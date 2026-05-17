@@ -59,21 +59,16 @@ header button{
   cursor:pointer;
 }
 
-/* HERO */
+/* SETTINGS BUTTON */
+.settings-btn{
+  background:#222;
+}
+
+/* HERO + ROWS */
 .hero{
   padding:40px 20px;
 }
 
-.hero h1{
-  font-size:40px;
-  margin:0;
-}
-
-.hero p{
-  opacity:.8;
-}
-
-/* ROWS */
 .row{
   padding:0 20px 30px;
 }
@@ -86,14 +81,8 @@ header button{
   display:flex;
   gap:10px;
   overflow-x:auto;
-  padding-bottom:10px;
 }
 
-.scroll::-webkit-scrollbar{
-  display:none;
-}
-
-/* CARD */
 .card{
   min-width:140px;
   border-radius:10px;
@@ -103,9 +92,7 @@ header button{
   transition:.2s;
 }
 
-.card:hover{
-  transform:scale(1.08);
-}
+.card:hover{transform:scale(1.08);}
 
 .card img{
   width:140px;
@@ -123,9 +110,7 @@ header button{
   opacity:0;
 }
 
-.card:hover .overlay{
-  opacity:1;
-}
+.card:hover .overlay{opacity:1;}
 
 /* PLAYER */
 .modal{
@@ -186,35 +171,85 @@ iframe{
   cursor:pointer;
 }
 
+/* SETTINGS PANEL */
+.panel{
+  position:fixed;
+  top:70px;
+  right:20px;
+  width:220px;
+  background:#111827;
+  border-radius:14px;
+  padding:14px;
+  display:none;
+  z-index:999;
+}
+
+.panel h3{
+  margin:0 0 10px;
+}
+
+.panel button{
+  width:100%;
+  margin-top:8px;
+  padding:10px;
+  border:0;
+  border-radius:10px;
+  background:#222;
+  color:white;
+  cursor:pointer;
+}
+
+.panel button:hover{
+  background:#333;
+}
+
 </style>
 </head>
 
 <body>
 
 <header>
-  <div class="logo">ENDERA'S MOVIES</div>
+
+  <div class="logo">ENDERA</div>
+
   <input id="searchInput" placeholder="Search movies & shows..."/>
+
   <button id="searchBtn">Search</button>
+
+  <button class="settings-btn" id="settingsBtn">⚙️</button>
+
 </header>
 
-<!-- HOME -->
-<div class="hero">
-  <h1>Welcome to Endera's movies</h1>
-  <p>Trending movies and TV shows</p>
+<!-- SETTINGS PANEL -->
+<div class="panel" id="settingsPanel">
+
+  <h3>Settings</h3>
+
+  <button onclick="setTheme('netflix')">Netflix Red</button>
+  <button onclick="setTheme('blue')">Blue</button>
+  <button onclick="setTheme('purple')">Purple</button>
+  <button onclick="setTheme('green')">Green</button>
+
 </div>
 
+<!-- HERO -->
+<div class="hero">
+  <h1>Welcome</h1>
+</div>
+
+<!-- TRENDING -->
 <div class="row">
   <h2>Trending Movies</h2>
   <div class="scroll" id="trendMovies"></div>
 </div>
 
 <div class="row">
-  <h2>Trending TV Shows</h2>
+  <h2>Trending TV</h2>
   <div class="scroll" id="trendTV"></div>
 </div>
 
 <div class="row">
-  <h2>Search Results</h2>
+  <h2>Search</h2>
   <div class="scroll" id="results"></div>
 </div>
 
@@ -234,7 +269,7 @@ iframe{
       <button onclick="loadPlayer()">Load</button>
     </div>
 
-    <iframe id="player" allowfullscreen></iframe>
+    <iframe id="player"></iframe>
 
   </div>
 
@@ -245,55 +280,87 @@ iframe{
 const TMDB_KEY =
   "c926a0628b472f4bde70b9457ed62bc3";
 
-let currentId = "";
-let currentType = "movie";
+let currentId="";
+let currentType="movie";
 
-/* TRENDING HOME */
+/* SETTINGS */
+document.getElementById("settingsBtn")
+.addEventListener("click",()=>{
 
-async function loadTrending(){
+  const panel =
+    document.getElementById("settingsPanel");
 
-  const movieRes =
-    await fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${TMDB_KEY}`);
+  panel.style.display =
+    panel.style.display==="block"
+      ? "none"
+      : "block";
+});
 
-  const tvRes =
-    await fetch(`https://api.themoviedb.org/3/trending/tv/week?api_key=${TMDB_KEY}`);
+/* THEMES */
+function setTheme(t){
 
-  const movies =
-    (await movieRes.json()).results || [];
+  if(t==="netflix"){
+    document.documentElement.style.setProperty("--accent","#e50914");
+    document.documentElement.style.setProperty("--hero1","#0b1020");
+    document.documentElement.style.setProperty("--hero2","#1b0000");
+  }
 
-  const tv =
-    (await tvRes.json()).results || [];
+  if(t==="blue"){
+    document.documentElement.style.setProperty("--accent","#3b82f6");
+    document.documentElement.style.setProperty("--hero1","#071428");
+    document.documentElement.style.setProperty("--hero2","#0f3b63");
+  }
 
-  renderRow("trendMovies",movies,"movie");
-  renderRow("trendTV",tv,"tv");
+  if(t==="purple"){
+    document.documentElement.style.setProperty("--accent","#a855f7");
+    document.documentElement.style.setProperty("--hero1","#14051f");
+    document.documentElement.style.setProperty("--hero2","#32104d");
+  }
+
+  if(t==="green"){
+    document.documentElement.style.setProperty("--accent","#22c55e");
+    document.documentElement.style.setProperty("--hero1","#03140a");
+    document.documentElement.style.setProperty("--hero2","#0d3d21");
+  }
+
+  localStorage.setItem("theme",t);
 }
 
-function renderRow(id,data,type){
+window.addEventListener("load",()=>{
+  const saved=localStorage.getItem("theme");
+  if(saved) setTheme(saved);
+});
 
-  const box =
-    document.getElementById(id);
+/* TRENDING */
+async function loadTrending(){
 
-  box.innerHTML = "";
+  const m =
+    await fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${TMDB_KEY}`)
+    .then(r=>r.json());
 
-  data.forEach(item=>{
+  const tv =
+    await fetch(`https://api.themoviedb.org/3/trending/tv/week?api_key=${TMDB_KEY}`)
+    .then(r=>r.json());
 
-    const title =
-      item.title || item.name;
+  render("trendMovies",m.results,"movie");
+  render("trendTV",tv.results,"tv");
+}
 
-    const poster =
-      item.poster_path
-        ? `https://image.tmdb.org/t/p/w300${item.poster_path}`
-        : "";
+function render(id,data,type){
 
-    box.innerHTML += `
+  const box=document.getElementById(id);
+  box.innerHTML="";
+
+  data.forEach(i=>{
+
+    const title=i.title||i.name;
+
+    box.innerHTML+=`
       <div class="card"
-        onclick="openPlayer('${item.id}','${type}','${title.replace(/'/g,"\\'")}')">
+        onclick="openPlayer('${i.id}','${type}','${title.replace(/'/g,"\\'")}')">
 
-        <img src="${poster}">
-
-        <div class="overlay">
-          <span>${title}</span>
-        </div>
+        <img src="https://image.tmdb.org/t/p/w300${i.poster_path}">
+        <div class="overlay"><span>${title}</span></div>
 
       </div>
     `;
@@ -301,111 +368,76 @@ function renderRow(id,data,type){
 }
 
 /* SEARCH */
+document.getElementById("searchBtn").onclick=async()=>{
 
-document.getElementById("searchBtn").onclick =
-async function search(){
+  const q=document.getElementById("searchInput").value;
 
-  const q =
-    document.getElementById("searchInput").value;
+  const res=
+    await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${q}`);
 
-  const res =
-    await fetch(
-      `https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${encodeURIComponent(q)}`
-    );
+  const data=await res.json();
 
-  const data =
-    await res.json();
+  const box=document.getElementById("results");
+  box.innerHTML="";
 
-  const box =
-    document.getElementById("results");
+  (data.results||[])
+  .filter(i=>i.media_type==="movie"||i.media_type==="tv")
+  .forEach(i=>{
 
-  box.innerHTML = "";
+    const title=i.title||i.name;
 
-  (data.results || [])
-    .filter(i=>i.media_type==="movie"||i.media_type==="tv")
-    .forEach(item=>{
+    box.innerHTML+=`
+      <div class="card"
+        onclick="openPlayer('${i.id}','${i.media_type}','${title.replace(/'/g,"\\'")}')">
 
-      const title =
-        item.title || item.name;
+        <img src="https://image.tmdb.org/t/p/w300${i.poster_path}">
+        <div class="overlay"><span>${title}</span></div>
 
-      const type =
-        item.media_type === "tv"
-          ? "series"
-          : "movie";
-
-      box.innerHTML += `
-        <div class="card"
-          onclick="openPlayer('${item.id}','${type}','${title.replace(/'/g,"\\'")}')">
-
-          <img src="https://image.tmdb.org/t/p/w300${item.poster_path}">
-
-          <div class="overlay">
-            <span>${title}</span>
-          </div>
-
-        </div>
-      `;
-    });
+      </div>
+    `;
+  });
 };
 
 /* PLAYER */
-
 function openPlayer(id,type,title){
 
-  currentId = id;
-  currentType = type;
+  currentId=id;
+  currentType=type==="tv"?"tv":"movie";
 
-  document.getElementById("playerTitle").textContent = title;
+  document.getElementById("playerTitle").textContent=title;
+  document.getElementById("playerModal").style.display="flex";
 
-  document.getElementById("playerModal").style.display = "flex";
-
-  document.getElementById("tvControls").style.display =
-    type==="tv" ? "flex" : "none";
+  document.getElementById("tvControls").style.display=
+    type==="tv"?"flex":"none";
 
   loadPlayer();
 }
 
 function loadPlayer(){
 
-  const iframe =
-    document.getElementById("player");
-
-  let url = "";
+  let url="";
 
   if(currentType==="tv"){
 
-    const season =
-      document.getElementById("season").value || 1;
+    const s=document.getElementById("season").value;
+    const e=document.getElementById("episode").value;
 
-    const episode =
-      document.getElementById("episode").value || 1;
-
-    url =
-      `https://vidfast.pro/tv/${currentId}/${season}/${episode}?autoPlay=true`;
+    url=`https://vidfast.pro/tv/${currentId}/${s}/${e}?autoPlay=true`;
 
   }else{
-
-    url =
-      `https://vidfast.pro/movie/${currentId}?autoPlay=true`;
+    url=`https://vidfast.pro/movie/${currentId}?autoPlay=true`;
   }
 
-  iframe.src = "about:blank";
+  const iframe=document.getElementById("player");
+  iframe.src="about:blank";
 
-  setTimeout(()=>{
-    iframe.src = url;
-  },120);
+  setTimeout(()=>iframe.src=url,100);
 }
 
 function closePlayer(){
   document.getElementById("playerModal").style.display="none";
   document.getElementById("player").src="about:blank";
 }
-
-/* ENTER SEARCH */
-document.getElementById("searchInput")
-.addEventListener("keydown",e=>{
-  if(e.key==="Enter") document.getElementById("searchBtn").click();
-});
 
 /* INIT */
 loadTrending();
