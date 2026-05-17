@@ -13,9 +13,7 @@
   --accent:#e50914;
 }
 
-*{
-  box-sizing:border-box;
-}
+*{box-sizing:border-box;}
 
 body{
   margin:0;
@@ -79,10 +77,6 @@ header button{
   z-index:9999;
 }
 
-.settings h3{
-  margin-top:0;
-}
-
 .settings button{
   width:100%;
   margin-top:8px;
@@ -94,9 +88,7 @@ header button{
   padding:18px 20px;
 }
 
-.row h2{
-  margin-bottom:10px;
-}
+.row h2{margin-bottom:10px;}
 
 .scroll{
   display:flex;
@@ -105,9 +97,7 @@ header button{
   padding-bottom:10px;
 }
 
-.scroll::-webkit-scrollbar{
-  display:none;
-}
+.scroll::-webkit-scrollbar{display:none;}
 
 /* CARDS */
 
@@ -122,9 +112,7 @@ header button{
   background:#111;
 }
 
-.card:hover{
-  transform:scale(1.08);
-}
+.card:hover{transform:scale(1.08);}
 
 .card img{
   width:100%;
@@ -143,9 +131,7 @@ header button{
   transition:.2s;
 }
 
-.card:hover .overlay{
-  opacity:1;
-}
+.card:hover .overlay{opacity:1;}
 
 /* PLAYER */
 
@@ -169,24 +155,6 @@ iframe{
   border:0;
   border-radius:14px;
   background:black;
-}
-
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:10px;
-}
-
-.close-btn{
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  border:0;
-  background:#e50914;
-  color:white;
-  font-size:18px;
-  cursor:pointer;
 }
 
 /* TV CONTROLS */
@@ -230,18 +198,10 @@ iframe{
   padding:10px;
   border:0;
   border-radius:10px;
-  cursor:pointer;
 }
 
-.primary{
-  background:var(--accent);
-  color:white;
-}
-
-.secondary{
-  background:#333;
-  color:white;
-}
+.primary{background:var(--accent);color:white;}
+.secondary{background:#333;color:white;}
 
 </style>
 </head>
@@ -249,587 +209,252 @@ iframe{
 <body>
 
 <!-- POPUP -->
-
 <div class="popup" id="popup">
-
   <div class="popup-box">
-
     <h2>Featured Picks</h2>
 
-    <p>Movie: Coraline</p>
+    <p>Coraline</p>
+    <button class="primary" onclick="featured('Coraline','movie')">Watch</button>
 
-    <button
-      class="primary"
-      onclick="featured('Coraline','movie')">
-      Watch Movie
-    </button>
+    <p>SK8 the Infinity</p>
+    <button class="primary" onclick="featured('SK8 the Infinity','tv')">Watch</button>
 
-    <p>Show: SK8 the Infinity</p>
-
-    <button
-      class="primary"
-      onclick="featured('SK8 the Infinity','tv')">
-      Watch Show
-    </button>
-
-    <button
-      class="secondary"
-      onclick="dontShowAgain()">
-      Don't show again
-    </button>
-
-    <button
-      class="secondary"
-      onclick="closePopup()">
-      Close
-    </button>
-
+    <button class="secondary" onclick="dontShowAgain()">Don't show again</button>
+    <button class="secondary" onclick="closePopup()">Close</button>
   </div>
-
 </div>
 
 <!-- SETTINGS -->
-
 <div class="settings" id="settings">
-
-  <h3>Themes</h3>
-
   <button onclick="theme('red')">Red</button>
   <button onclick="theme('blue')">Blue</button>
-  <button onclick="theme('purple')">Purple</button>
-  <button onclick="theme('green')">Green</button>
-
 </div>
 
 <!-- HEADER -->
-
 <header>
+  <div class="logo">ENDERA</div>
 
-  <div class="logo">
-    ENDERA'S MOVIES
-  </div>
-
-  <input
-    id="searchInput"
-    placeholder="Search movies & shows..."
-  />
-
-  <button onclick="searchMedia()">
-    Search
-  </button>
-
-  <button onclick="toggleSettings()">
-    ⚙️
-  </button>
-
+  <input id="searchInput" placeholder="Search..." />
+  <button onclick="searchMedia()">Search</button>
+  <button onclick="toggleSettings()">⚙️</button>
 </header>
 
 <!-- CONTINUE -->
-
 <div class="row">
   <h2>Continue Watching</h2>
   <div class="scroll" id="continueRow"></div>
 </div>
 
 <!-- TRENDING -->
-
 <div class="row">
   <h2>Trending Movies</h2>
   <div class="scroll" id="movies"></div>
 </div>
 
 <div class="row">
-  <h2>Trending shows</h2>
+  <h2>Trending Shows</h2>
   <div class="scroll" id="tv"></div>
 </div>
 
+<!-- GENRES -->
 <div class="row">
-  <h2>Search Results</h2>
-  <div class="scroll" id="results"></div>
+  <h2>Action</h2>
+  <div class="scroll" id="actionRow"></div>
+</div>
+
+<div class="row">
+  <h2>Comedy</h2>
+  <div class="scroll" id="comedyRow"></div>
+</div>
+
+<div class="row">
+  <h2>Horror</h2>
+  <div class="scroll" id="horrorRow"></div>
+</div>
+
+<!-- RECOMMENDATIONS -->
+<div class="row">
+  <h2>Recommended For You</h2>
+  <div class="scroll" id="recommendRow"></div>
 </div>
 
 <!-- PLAYER -->
-
 <div class="modal" id="playerModal">
 
   <div class="player-box">
 
-    <div class="topbar">
+    <h2 id="playerTitle"></h2>
 
-      <h2 id="playerTitle"></h2>
-
-      <button
-        class="close-btn"
-        onclick="closePlayer()">
-        ✕
-      </button>
-
+    <div class="tv-controls" id="tvControls">
+      <input id="season" type="number" value="1"/>
+      <input id="episode" type="number" value="1"/>
+      <button onclick="loadPlayer()">Load</button>
     </div>
 
-    <div
-      class="tv-controls"
-      id="tvControls">
-
-      <input
-        id="season"
-        type="number"
-        min="1"
-        value="1"
-      />
-
-      <input
-        id="episode"
-        type="number"
-        min="1"
-        value="1"
-      />
-
-      <button onclick="loadPlayer()">
-        Load
-      </button>
-
-    </div>
-
-    <iframe
-      id="player"
-      allowfullscreen
-      allow="autoplay; fullscreen"
-      sandbox="
-        allow-scripts
-        allow-same-origin
-        allow-forms
-        allow-presentation
-      ">
+    <!-- FIXED IFRAME -->
+    <iframe id="player"
+      allow="autoplay; fullscreen; encrypted-media"
+      referrerpolicy="no-referrer">
     </iframe>
 
   </div>
-
 </div>
 
 <script>
 
-const TMDB_KEY =
-  "c926a0628b472f4bde70b9457ed62bc3";
+const TMDB_KEY = "c926a0628b472f4bde70b9457ed62bc3";
 
-let currentId = "";
-let currentType = "movie";
+let currentId="";
+let currentType="movie";
 
 /* SETTINGS */
-
 function toggleSettings(){
-
-  const s =
-    document.getElementById("settings");
-
-  s.style.display =
-    s.style.display === "block"
-      ? "none"
-      : "block";
-}
-
-function theme(t){
-
-  if(t==="red"){
-    set("#0b1020","#1b0000","#e50914");
-  }
-
-  if(t==="blue"){
-    set("#071428","#0f3b63","#3b82f6");
-  }
-
-  if(t==="purple"){
-    set("#16051f","#35104d","#a855f7");
-  }
-
-  if(t==="green"){
-    set("#04140a","#0c3b1d","#22c55e");
-  }
-
-  localStorage.setItem("theme",t);
-}
-
-function set(bg1,bg2,accent){
-
-  document.documentElement
-    .style.setProperty("--bg1",bg1);
-
-  document.documentElement
-    .style.setProperty("--bg2",bg2);
-
-  document.documentElement
-    .style.setProperty("--accent",accent);
+  const s=document.getElementById("settings");
+  s.style.display = s.style.display==="block"?"none":"block";
 }
 
 /* POPUP */
-
 function closePopup(){
-
-  document.getElementById("popup")
-    .style.display="none";
+  document.getElementById("popup").style.display="none";
 }
-
 function dontShowAgain(){
-
-  localStorage.setItem(
-    "hidePopup",
-    "true"
-  );
-
+  localStorage.setItem("hidePopup","true");
   closePopup();
 }
 
+/* FEATURED */
 async function featured(name,type){
-
-  const res =
-    await fetch(
-      `https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${encodeURIComponent(name)}`
-    );
-
-  const data =
-    await res.json();
-
-  const item =
-    data.results?.[0];
-
-  if(!item) return;
-
-  openPlayer(
-    item.id,
-    type,
-    item.title || item.name,
-    `https://image.tmdb.org/t/p/w300${item.poster_path}`
+  const res=await fetch(
+    `https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${encodeURIComponent(name)}`
   );
+  const data=await res.json();
+  const item=data.results?.[0];
+  if(!item)return;
 
+  openPlayer(item.id,type,item.title||item.name,"");
   closePopup();
 }
 
-/* CONTINUE WATCHING */
-
-function saveContinue(
-  id,
-  type,
-  title,
-  poster
-){
-
-  let list =
-    JSON.parse(
-      localStorage.getItem("cw") || "[]"
-    );
-
-  list =
-    list.filter(i=>i.id!==id);
-
-  list.unshift({
-    id,
-    type,
-    title,
-    poster
-  });
-
-  localStorage.setItem(
-    "cw",
-    JSON.stringify(list.slice(0,10))
-  );
-
+/* CONTINUE */
+function saveContinue(id,type,title,poster){
+  let list=JSON.parse(localStorage.getItem("cw")||"[]");
+  list=list.filter(i=>i.id!==id);
+  list.unshift({id,type,title,poster});
+  localStorage.setItem("cw",JSON.stringify(list.slice(0,10)));
   renderContinue();
 }
 
 function renderContinue(){
-
-  const box =
-    document.getElementById("continueRow");
-
-  const list =
-    JSON.parse(
-      localStorage.getItem("cw") || "[]"
-    );
-
-  box.innerHTML = "";
-
+  const box=document.getElementById("continueRow");
+  const list=JSON.parse(localStorage.getItem("cw")||"[]");
+  box.innerHTML="";
   list.forEach(i=>{
-
-    box.innerHTML += `
-      <div class="card"
-        onclick="openPlayer(
-          '${i.id}',
-          '${i.type}',
-          '${i.title.replace(/'/g,"\\'")}',
-          '${i.poster}'
-        )">
-
+    box.innerHTML+=`
+      <div class="card" onclick="openPlayer('${i.id}','${i.type}','${i.title}','${i.poster}')">
         <img src="${i.poster}">
-
-        <div class="overlay">
-          <span>${i.title}</span>
-        </div>
-
-      </div>
-    `;
+        <div class="overlay"><span>${i.title}</span></div>
+      </div>`;
   });
 }
 
 /* RENDER */
-
 function render(id,data,type){
-
-  const box =
-    document.getElementById(id);
-
-  box.innerHTML = "";
-
+  const box=document.getElementById(id);
+  box.innerHTML="";
   data.forEach(i=>{
-
-    const title =
-      i.title || i.name;
-
-    const poster =
-      `https://image.tmdb.org/t/p/w300${i.poster_path}`;
-
-    box.innerHTML += `
-      <div class="card"
-        onclick="openPlayer(
-          '${i.id}',
-          '${type}',
-          '${title.replace(/'/g,"\\'")}',
-          '${poster}'
-        )">
-
+    const title=i.title||i.name;
+    const poster=`https://image.tmdb.org/t/p/w300${i.poster_path}`;
+    box.innerHTML+=`
+      <div class="card" onclick="openPlayer('${i.id}','${type}','${title}','${poster}')">
         <img src="${poster}">
-
-        <div class="overlay">
-          <span>${title}</span>
-        </div>
-
-      </div>
-    `;
+        <div class="overlay"><span>${title}</span></div>
+      </div>`;
   });
 }
 
 /* TRENDING */
-
 async function loadTrending(){
+  const m=await fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${TMDB_KEY}`).then(r=>r.json());
+  const t=await fetch(`https://api.themoviedb.org/3/trending/tv/week?api_key=${TMDB_KEY}`).then(r=>r.json());
 
-  const movies =
-    await fetch(
-      `https://api.themoviedb.org/3/trending/movie/week?api_key=${TMDB_KEY}`
-    ).then(r=>r.json());
+  render("movies",m.results||[],"movie");
+  render("tv",t.results||[],"tv");
+}
 
-  const tv =
-    await fetch(
-      `https://api.themoviedb.org/3/trending/tv/week?api_key=${TMDB_KEY}`
-    ).then(r=>r.json());
+/* GENRES */
+async function loadGenres(){
 
-  render(
-    "movies",
-    movies.results || [],
-    "movie"
-  );
+  const load=async(id,row)=>{
+    const r=await fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${TMDB_KEY}&with_genres=${id}`).then(r=>r.json());
+    render(row,r.results||[],"movie");
+  };
 
-  render(
-    "tv",
-    tv.results || [],
-    "tv"
-  );
+  load(28,"actionRow");
+  load(35,"comedyRow");
+  load(27,"horrorRow");
+}
+
+/* RECOMMENDATIONS */
+async function loadRecommendations(id,type){
+  const r=await fetch(`https://api.themoviedb.org/3/${type}/${id}/recommendations?api_key=${TMDB_KEY}`).then(r=>r.json());
+  render("recommendRow",r.results||[],type);
 }
 
 /* SEARCH */
-
 async function searchMedia(){
+  const q=document.getElementById("searchInput").value.trim();
+  if(!q)return;
 
-  const q =
-    document.getElementById("searchInput")
-    .value.trim();
+  const r=await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${encodeURIComponent(q)}`).then(r=>r.json());
 
-  if(!q) return;
-
-  const res =
-    await fetch(
-      `https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${encodeURIComponent(q)}`
-    );
-
-  const data =
-    await res.json();
-
-  const results =
-    (data.results || [])
-    .filter(i =>
-      i.media_type==="movie" ||
-      i.media_type==="tv"
-    );
-
-  const box =
-    document.getElementById("results");
-
-  box.innerHTML = "";
-
-  results.forEach(i=>{
-
-    const title =
-      i.title || i.name;
-
-    const poster =
-      `https://image.tmdb.org/t/p/w300${i.poster_path}`;
-
-    box.innerHTML += `
-      <div class="card"
-        onclick="openPlayer(
-          '${i.id}',
-          '${i.media_type}',
-          '${title.replace(/'/g,"\\'")}',
-          '${poster}'
-        )">
-
-        <img src="${poster}">
-
-        <div class="overlay">
-          <span>${title}</span>
-        </div>
-
-      </div>
-    `;
-  });
+  render("movies",r.results.filter(i=>i.media_type==="movie"),"movie");
+  render("tv",r.results.filter(i=>i.media_type==="tv"),"tv");
 }
 
 /* PLAYER */
+function openPlayer(id,type,title,poster){
+  currentId=id;
+  currentType=type==="tv"?"tv":"movie";
 
-function openPlayer(
-  id,
-  type,
-  title,
-  poster=""
-){
+  document.getElementById("playerTitle").textContent=title;
+  document.getElementById("playerModal").style.display="flex";
 
-  currentId = id;
-
-  currentType =
-    type === "tv"
-      ? "tv"
-      : "movie";
-
-  document.getElementById("playerTitle")
-    .textContent = title;
-
-  document.getElementById("playerModal")
-    .style.display = "flex";
-
-  document.getElementById("tvControls")
-    .style.display =
-      currentType === "tv"
-        ? "flex"
-        : "none";
+  document.getElementById("tvControls").style.display=
+    currentType==="tv"?"flex":"none";
 
   loadPlayer();
+  loadRecommendations(id,currentType);
 
-  saveContinue(
-    id,
-    type,
-    title,
-    poster
-  );
+  saveContinue(id,type,title,poster);
 }
 
 function loadPlayer(){
-
-  let url = "";
+  let url="";
 
   if(currentType==="tv"){
-
-    const season =
-      document.getElementById("season")
-      .value || 1;
-
-    const episode =
-      document.getElementById("episode")
-      .value || 1;
-
-    url =
-      `https://vidfast.pro/tv/${currentId}/${season}/${episode}?autoPlay=true`;
-
-  }else{
-
-    url =
-      `https://vidfast.pro/movie/${currentId}?autoPlay=true`;
+    const s=season.value||1;
+    const e=episode.value||1;
+    url=`https://vidfast.pro/tv/${currentId}/${s}/${e}?autoPlay=true`;
+  } else {
+    url=`https://vidfast.pro/movie/${currentId}?autoPlay=true`;
   }
 
-  const iframe =
-    document.getElementById("player");
-
-  iframe.src = "about:blank";
-
-  setTimeout(()=>{
-    iframe.src = url;
-  },100);
+  player.src="about:blank";
+  setTimeout(()=>player.src=url,100);
 }
 
 function closePlayer(){
-
-  const modal =
-    document.getElementById("playerModal");
-
-  const iframe =
-    document.getElementById("player");
-
-  modal.style.display = "none";
-
-  iframe.src = "about:blank";
+  playerModal.style.display="none";
+  player.src="about:blank";
 }
-
-/* REDIRECT BLOCKER */
-
-const iframe =
-  document.getElementById("player");
-
-window.addEventListener(
-  "beforeunload",
-  (e)=>{
-
-    if(
-      document.activeElement === iframe
-    ){
-      e.preventDefault();
-      e.returnValue = "";
-    }
-  }
-);
-
-document.addEventListener(
-  "click",
-  (e)=>{
-
-    const link =
-      e.target.closest("a");
-
-    if(!link) return;
-
-    if(
-      document.getElementById("playerModal")
-        .style.display === "flex"
-    ){
-      e.preventDefault();
-    }
-  }
-);
 
 /* INIT */
-
 loadTrending();
-
+loadGenres();
 renderContinue();
 
-const savedTheme =
-  localStorage.getItem("theme");
-
-if(savedTheme){
-  theme(savedTheme);
-}
-
-if(
-  localStorage.getItem("hidePopup")
-  !== "true"
-){
-  document.getElementById("popup")
-    .style.display="flex";
+if(localStorage.getItem("hidePopup")!=="true"){
+  popup.style.display="flex";
 }
 
 </script>
