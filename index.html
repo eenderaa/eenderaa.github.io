@@ -29,16 +29,14 @@ header{
   display:flex;
   gap:12px;
   align-items:center;
-  padding:14px 18px;
+  padding:14px;
   background:rgba(0,0,0,.75);
   backdrop-filter:blur(10px);
-  z-index:10;
 }
 
 .logo{
   font-weight:900;
   color:var(--accent);
-  font-size:22px;
 }
 
 header input{
@@ -59,22 +57,9 @@ header button{
   cursor:pointer;
 }
 
-/* SETTINGS BUTTON */
-.settings-btn{
-  background:#222;
-}
-
-/* HERO + ROWS */
-.hero{
-  padding:40px 20px;
-}
-
+/* ROWS */
 .row{
-  padding:0 20px 30px;
-}
-
-.row h2{
-  margin:20px 0 10px;
+  padding:10px 20px;
 }
 
 .scroll{
@@ -88,8 +73,8 @@ header button{
   border-radius:10px;
   overflow:hidden;
   cursor:pointer;
-  position:relative;
   transition:.2s;
+  position:relative;
 }
 
 .card:hover{transform:scale(1.08);}
@@ -131,13 +116,11 @@ iframe{
   height:70vh;
   border:0;
   border-radius:14px;
-  background:black;
 }
 
 .top{
   display:flex;
   justify-content:space-between;
-  margin-bottom:10px;
 }
 
 .close{
@@ -146,61 +129,36 @@ iframe{
   padding:10px 14px;
   border-radius:10px;
   color:white;
-  cursor:pointer;
 }
 
-.tv{
-  display:none;
-  gap:10px;
-  margin-bottom:10px;
-}
-
-.tv input{
-  width:120px;
-  padding:10px;
-  border-radius:10px;
-  border:0;
-}
-
-.tv button{
-  background:var(--accent);
-  border:0;
-  color:white;
-  padding:10px 14px;
-  border-radius:10px;
-  cursor:pointer;
-}
-
-/* SETTINGS PANEL */
-.panel{
+/* POPUP */
+.popup{
   position:fixed;
-  top:70px;
-  right:20px;
-  width:220px;
+  inset:0;
+  background:rgba(0,0,0,.85);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+
+.popup-box{
   background:#111827;
-  border-radius:14px;
-  padding:14px;
-  display:none;
-  z-index:999;
+  padding:20px;
+  border-radius:16px;
+  width:320px;
+  text-align:center;
 }
 
-.panel h3{
-  margin:0 0 10px;
-}
-
-.panel button{
+.popup-box button{
   width:100%;
-  margin-top:8px;
+  margin-top:10px;
   padding:10px;
   border:0;
   border-radius:10px;
-  background:#222;
+  background:var(--accent);
   color:white;
   cursor:pointer;
-}
-
-.panel button:hover{
-  background:#333;
 }
 
 </style>
@@ -208,44 +166,49 @@ iframe{
 
 <body>
 
+<!-- START POPUP -->
+<div class="popup" id="startupPopup">
+  <div class="popup-box">
+
+    <h2>🎬 Featured Picks</h2>
+
+    <p>Movie: Coraline</p>
+    <button onclick="openFeatured('Coraline','movie')">
+      Watch Movie
+    </button>
+
+    <p>Show: SK8 the Infinity</p>
+    <button onclick="openFeatured('SK8 the Infinity','tv')">
+      Watch Show
+    </button>
+
+    <button onclick="closePopup()" style="background:#333">
+      Close
+    </button>
+
+  </div>
+</div>
+
 <header>
-
   <div class="logo">ENDERA</div>
-
-  <input id="searchInput" placeholder="Search movies & shows..."/>
-
-  <button id="searchBtn">Search</button>
-
-  <button class="settings-btn" id="settingsBtn">⚙️</button>
-
+  <input id="searchInput" placeholder="Search..."/>
+  <button onclick="search()">Search</button>
 </header>
 
-<!-- SETTINGS PANEL -->
-<div class="panel" id="settingsPanel">
-
-  <h3>Settings</h3>
-
-  <button onclick="setTheme('netflix')">Netflix Red</button>
-  <button onclick="setTheme('blue')">Blue</button>
-  <button onclick="setTheme('purple')">Purple</button>
-  <button onclick="setTheme('green')">Green</button>
-
+<!-- CONTINUE WATCHING -->
+<div class="row">
+  <h2>Continue Watching</h2>
+  <div class="scroll" id="continueRow"></div>
 </div>
 
-<!-- HERO -->
-<div class="hero">
-  <h1>Welcome</h1>
-</div>
-
-<!-- TRENDING -->
 <div class="row">
   <h2>Trending Movies</h2>
-  <div class="scroll" id="trendMovies"></div>
+  <div class="scroll" id="movies"></div>
 </div>
 
 <div class="row">
   <h2>Trending TV</h2>
-  <div class="scroll" id="trendTV"></div>
+  <div class="scroll" id="tv"></div>
 </div>
 
 <div class="row">
@@ -255,105 +218,106 @@ iframe{
 
 <!-- PLAYER -->
 <div class="modal" id="playerModal">
-
   <div class="box">
 
     <div class="top">
-      <h2 id="playerTitle"></h2>
-      <button class="close" onclick="closePlayer()">Close</button>
-    </div>
-
-    <div class="tv" id="tvControls">
-      <input id="season" type="number" value="1"/>
-      <input id="episode" type="number" value="1"/>
-      <button onclick="loadPlayer()">Load</button>
+      <h2 id="title"></h2>
+      <button class="close" onclick="closePlayer()">X</button>
     </div>
 
     <iframe id="player"></iframe>
 
   </div>
-
 </div>
 
 <script>
 
-const TMDB_KEY =
-  "c926a0628b472f4bde70b9457ed62bc3";
+const TMDB_KEY="c926a0628b472f4bde70b9457ed62bc3";
 
 let currentId="";
 let currentType="movie";
 
-/* SETTINGS */
-document.getElementById("settingsBtn")
-.addEventListener("click",()=>{
-
-  const panel =
-    document.getElementById("settingsPanel");
-
-  panel.style.display =
-    panel.style.display==="block"
-      ? "none"
-      : "block";
-});
-
-/* THEMES */
-function setTheme(t){
-
-  if(t==="netflix"){
-    document.documentElement.style.setProperty("--accent","#e50914");
-    document.documentElement.style.setProperty("--hero1","#0b1020");
-    document.documentElement.style.setProperty("--hero2","#1b0000");
-  }
-
-  if(t==="blue"){
-    document.documentElement.style.setProperty("--accent","#3b82f6");
-    document.documentElement.style.setProperty("--hero1","#071428");
-    document.documentElement.style.setProperty("--hero2","#0f3b63");
-  }
-
-  if(t==="purple"){
-    document.documentElement.style.setProperty("--accent","#a855f7");
-    document.documentElement.style.setProperty("--hero1","#14051f");
-    document.documentElement.style.setProperty("--hero2","#32104d");
-  }
-
-  if(t==="green"){
-    document.documentElement.style.setProperty("--accent","#22c55e");
-    document.documentElement.style.setProperty("--hero1","#03140a");
-    document.documentElement.style.setProperty("--hero2","#0d3d21");
-  }
-
-  localStorage.setItem("theme",t);
+/* POPUP */
+function closePopup(){
+  document.getElementById("startupPopup").style.display="none";
 }
 
-window.addEventListener("load",()=>{
-  const saved=localStorage.getItem("theme");
-  if(saved) setTheme(saved);
-});
+async function openFeatured(name,type){
 
-/* TRENDING */
-async function loadTrending(){
+  const res=await fetch(
+    `https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${encodeURIComponent(name)}`
+  );
 
-  const m =
-    await fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${TMDB_KEY}`)
-    .then(r=>r.json());
+  const data=await res.json();
 
-  const tv =
-    await fetch(`https://api.themoviedb.org/3/trending/tv/week?api_key=${TMDB_KEY}`)
-    .then(r=>r.json());
+  const item=data.results?.[0];
 
-  render("trendMovies",m.results,"movie");
-  render("trendTV",tv.results,"tv");
+  if(item){
+    openPlayer(item.id,type,name);
+  }
+
+  closePopup();
 }
 
-function render(id,data,type){
+/* CONTINUE WATCHING */
+function saveContinue(id,type,title){
 
-  const box=document.getElementById(id);
+  let list=JSON.parse(localStorage.getItem("cw")||"[]");
+
+  list=list.filter(i=>i.id!==id);
+
+  list.unshift({id,type,title});
+
+  list=list.slice(0,10);
+
+  localStorage.setItem("cw",JSON.stringify(list));
+
+  renderContinue();
+}
+
+function renderContinue(){
+
+  const box=document.getElementById("continueRow");
+
+  let list=JSON.parse(localStorage.getItem("cw")||"[]");
+
   box.innerHTML="";
 
-  data.forEach(i=>{
+  list.forEach(i=>{
+
+    box.innerHTML+=`
+      <div class="card"
+        onclick="openPlayer('${i.id}','${i.type}','${i.title}')">
+
+        <img src="https://placehold.co/140x210">
+        <div class="overlay"><span>${i.title}</span></div>
+
+      </div>
+    `;
+  });
+}
+
+/* SEARCH */
+async function search(){
+
+  const q=document.getElementById("searchInput").value;
+
+  const res=await fetch(
+    `https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${q}`
+  );
+
+  const data=await res.json();
+
+  const box=document.getElementById("results");
+  box.innerHTML="";
+
+  (data.results||[])
+  .filter(i=>i.media_type==="movie"||i.media_type==="tv")
+  .forEach(i=>{
 
     const title=i.title||i.name;
+
+    const type=i.media_type==="tv"?"tv":"movie";
 
     box.innerHTML+=`
       <div class="card"
@@ -367,50 +331,19 @@ function render(id,data,type){
   });
 }
 
-/* SEARCH */
-document.getElementById("searchBtn").onclick=async()=>{
-
-  const q=document.getElementById("searchInput").value;
-
-  const res=
-    await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${q}`);
-
-  const data=await res.json();
-
-  const box=document.getElementById("results");
-  box.innerHTML="";
-
-  (data.results||[])
-  .filter(i=>i.media_type==="movie"||i.media_type==="tv")
-  .forEach(i=>{
-
-    const title=i.title||i.name;
-
-    box.innerHTML+=`
-      <div class="card"
-        onclick="openPlayer('${i.id}','${i.media_type}','${title.replace(/'/g,"\\'")}')">
-
-        <img src="https://image.tmdb.org/t/p/w300${i.poster_path}">
-        <div class="overlay"><span>${title}</span></div>
-
-      </div>
-    `;
-  });
-};
-
 /* PLAYER */
 function openPlayer(id,type,title){
 
   currentId=id;
-  currentType=type==="tv"?"tv":"movie";
+  currentType=type;
 
-  document.getElementById("playerTitle").textContent=title;
+  document.getElementById("title").textContent=title;
+
   document.getElementById("playerModal").style.display="flex";
 
-  document.getElementById("tvControls").style.display=
-    type==="tv"?"flex":"none";
-
   loadPlayer();
+
+  saveContinue(id,type,title);
 }
 
 function loadPlayer(){
@@ -419,16 +352,15 @@ function loadPlayer(){
 
   if(currentType==="tv"){
 
-    const s=document.getElementById("season").value;
-    const e=document.getElementById("episode").value;
-
-    url=`https://vidfast.pro/tv/${currentId}/${s}/${e}?autoPlay=true`;
+    url=`https://vidfast.pro/tv/${currentId}/1/1?autoPlay=true`;
 
   }else{
+
     url=`https://vidfast.pro/movie/${currentId}?autoPlay=true`;
   }
 
   const iframe=document.getElementById("player");
+
   iframe.src="about:blank";
 
   setTimeout(()=>iframe.src=url,100);
@@ -440,7 +372,9 @@ function closePlayer(){
 }
 
 /* INIT */
-loadTrending();
+renderContinue();
+setTimeout(()=>loadTrending(),500);
+document.getElementById("startupPopup").style.display="flex";
 
 </script>
 
