@@ -118,25 +118,12 @@ iframe{
   border-radius:14px;
 }
 
-.top{
-  display:flex;
-  justify-content:space-between;
-}
-
-.close{
-  background:var(--accent);
-  border:0;
-  padding:10px 14px;
-  border-radius:10px;
-  color:white;
-}
-
 /* POPUP */
 .popup{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.85);
-  display:flex;
+  display:none;
   align-items:center;
   justify-content:center;
   z-index:9999;
@@ -156,35 +143,31 @@ iframe{
   padding:10px;
   border:0;
   border-radius:10px;
-  background:var(--accent);
-  color:white;
   cursor:pointer;
 }
+
+.primary{background:var(--accent);color:white;}
+.secondary{background:#333;color:white;}
 
 </style>
 </head>
 
 <body>
 
-<!-- START POPUP -->
+<!-- POPUP -->
 <div class="popup" id="startupPopup">
   <div class="popup-box">
 
     <h2>🎬 Featured Picks</h2>
 
-    <p>Movie: Coraline</p>
-    <button onclick="openFeatured('Coraline','movie')">
-      Watch Movie
-    </button>
+    <p>Coraline (Movie)</p>
+    <button class="primary" onclick="openFeatured('Coraline','movie')">Watch</button>
 
-    <p>Show: SK8 the Infinity</p>
-    <button onclick="openFeatured('SK8 the Infinity','tv')">
-      Watch Show
-    </button>
+    <p>SK8 the Infinity (Show)</p>
+    <button class="primary" onclick="openFeatured('SK8 the Infinity','tv')">Watch</button>
 
-    <button onclick="closePopup()" style="background:#333">
-      Close
-    </button>
+    <button class="secondary" onclick="dontShowAgain()">Don't show again</button>
+    <button class="secondary" onclick="closePopup()">Close</button>
 
   </div>
 </div>
@@ -195,12 +178,13 @@ iframe{
   <button onclick="search()">Search</button>
 </header>
 
-<!-- CONTINUE WATCHING -->
+<!-- CONTINUE -->
 <div class="row">
   <h2>Continue Watching</h2>
   <div class="scroll" id="continueRow"></div>
 </div>
 
+<!-- TRENDING -->
 <div class="row">
   <h2>Trending Movies</h2>
   <div class="scroll" id="movies"></div>
@@ -219,14 +203,8 @@ iframe{
 <!-- PLAYER -->
 <div class="modal" id="playerModal">
   <div class="box">
-
-    <div class="top">
-      <h2 id="title"></h2>
-      <button class="close" onclick="closePlayer()">X</button>
-    </div>
-
+    <h2 id="title"></h2>
     <iframe id="player"></iframe>
-
   </div>
 </div>
 
@@ -237,11 +215,21 @@ const TMDB_KEY="c926a0628b472f4bde70b9457ed62bc3";
 let currentId="";
 let currentType="movie";
 
-/* POPUP */
+/* POPUP CONTROL */
+function dontShowAgain(){
+  localStorage.setItem("hidePopup","true");
+  closePopup();
+}
+
 function closePopup(){
   document.getElementById("startupPopup").style.display="none";
 }
 
+function shouldShowPopup(){
+  return localStorage.getItem("hidePopup")!=="true";
+}
+
+/* FEATURED */
 async function openFeatured(name,type){
 
   const res=await fetch(
@@ -268,9 +256,7 @@ function saveContinue(id,type,title){
 
   list.unshift({id,type,title});
 
-  list=list.slice(0,10);
-
-  localStorage.setItem("cw",JSON.stringify(list));
+  localStorage.setItem("cw",JSON.stringify(list.slice(0,10)));
 
   renderContinue();
 }
@@ -297,6 +283,42 @@ function renderContinue(){
   });
 }
 
+/* TRENDING FIXED */
+async function loadTrending(){
+
+  const m=await fetch(
+    `https://api.themoviedb.org/3/trending/movie/week?api_key=${TMDB_KEY}`
+  ).then(r=>r.json());
+
+  const t=await fetch(
+    `https://api.themoviedb.org/3/trending/tv/week?api_key=${TMDB_KEY}`
+  ).then(r=>r.json());
+
+  render("movies",m.results,"movie");
+  render("tv",t.results,"tv");
+}
+
+function render(id,data,type){
+
+  const box=document.getElementById(id);
+  box.innerHTML="";
+
+  data.forEach(i=>{
+
+    const title=i.title||i.name;
+
+    box.innerHTML+=`
+      <div class="card"
+        onclick="openPlayer('${i.id}','${type}','${title.replace(/'/g,"\\'")}')">
+
+        <img src="https://image.tmdb.org/t/p/w300${i.poster_path}">
+        <div class="overlay"><span>${title}</span></div>
+
+      </div>
+    `;
+  });
+}
+
 /* SEARCH */
 async function search(){
 
@@ -317,11 +339,9 @@ async function search(){
 
     const title=i.title||i.name;
 
-    const type=i.media_type==="tv"?"tv":"movie";
-
     box.innerHTML+=`
       <div class="card"
-        onclick="openPlayer('${i.id}','${type}','${title.replace(/'/g,"\\'")}')">
+        onclick="openPlayer('${i.id}','${i.media_type}','${title.replace(/'/g,"\\'")}')">
 
         <img src="https://image.tmdb.org/t/p/w300${i.poster_path}">
         <div class="overlay"><span>${title}</span></div>
@@ -338,7 +358,6 @@ function openPlayer(id,type,title){
   currentType=type;
 
   document.getElementById("title").textContent=title;
-
   document.getElementById("playerModal").style.display="flex";
 
   loadPlayer();
@@ -351,30 +370,21 @@ function loadPlayer(){
   let url="";
 
   if(currentType==="tv"){
-
     url=`https://vidfast.pro/tv/${currentId}/1/1?autoPlay=true`;
-
   }else{
-
     url=`https://vidfast.pro/movie/${currentId}?autoPlay=true`;
   }
 
-  const iframe=document.getElementById("player");
-
-  iframe.src="about:blank";
-
-  setTimeout(()=>iframe.src=url,100);
-}
-
-function closePlayer(){
-  document.getElementById("playerModal").style.display="none";
-  document.getElementById("player").src="about:blank";
+  document.getElementById("player").src=url;
 }
 
 /* INIT */
+loadTrending();
 renderContinue();
-setTimeout(()=>loadTrending(),500);
-document.getElementById("startupPopup").style.display="flex";
+
+if(shouldShowPopup()){
+  document.getElementById("startupPopup").style.display="flex";
+}
 
 </script>
 
