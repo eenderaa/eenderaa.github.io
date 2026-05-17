@@ -8,8 +8,8 @@
 <style>
 
 :root{
-  --hero1:#0b1020;
-  --hero2:#1b0000;
+  --bg1:#0b1020;
+  --bg2:#1b0000;
   --accent:#e50914;
 }
 
@@ -19,9 +19,10 @@
 
 body{
   margin:0;
-  font-family:Arial;
-  background:linear-gradient(135deg,var(--hero1),var(--hero2));
+  font-family:Arial,sans-serif;
+  background:linear-gradient(135deg,var(--bg1),var(--bg2));
   color:white;
+  overflow-x:hidden;
 }
 
 /* HEADER */
@@ -29,17 +30,17 @@ body{
 header{
   position:sticky;
   top:0;
-  z-index:100;
+  z-index:999;
   display:flex;
-  gap:12px;
   align-items:center;
-  padding:14px;
-  background:rgba(0,0,0,.8);
+  gap:12px;
+  padding:14px 20px;
+  background:rgba(0,0,0,.75);
   backdrop-filter:blur(10px);
 }
 
 .logo{
-  font-size:24px;
+  font-size:28px;
   font-weight:900;
   color:var(--accent);
 }
@@ -51,6 +52,7 @@ header input{
   border:0;
   background:#1a1f2e;
   color:white;
+  outline:none;
 }
 
 header button{
@@ -65,7 +67,7 @@ header button{
 
 /* SETTINGS */
 
-.settings-panel{
+.settings{
   position:fixed;
   top:70px;
   right:20px;
@@ -74,26 +76,22 @@ header button{
   border-radius:16px;
   padding:14px;
   display:none;
-  z-index:999;
+  z-index:9999;
 }
 
-.settings-panel h3{
+.settings h3{
   margin-top:0;
 }
 
-.settings-panel button{
+.settings button{
   width:100%;
   margin-top:8px;
-  padding:10px;
-  border:0;
-  border-radius:10px;
-  cursor:pointer;
 }
 
 /* ROWS */
 
 .row{
-  padding:10px 20px;
+  padding:18px 20px;
 }
 
 .row h2{
@@ -115,6 +113,7 @@ header button{
 
 .card{
   min-width:150px;
+  width:150px;
   border-radius:12px;
   overflow:hidden;
   position:relative;
@@ -124,14 +123,13 @@ header button{
 }
 
 .card:hover{
-  transform:scale(1.07);
+  transform:scale(1.08);
 }
 
 .card img{
-  width:150px;
+  width:100%;
   height:225px;
   object-fit:cover;
-  display:block;
 }
 
 .overlay{
@@ -154,11 +152,11 @@ header button{
 .modal{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.92);
+  background:rgba(0,0,0,.94);
   display:none;
   align-items:center;
   justify-content:center;
-  z-index:9999;
+  z-index:99999;
 }
 
 .player-box{
@@ -171,6 +169,24 @@ iframe{
   border:0;
   border-radius:14px;
   background:black;
+}
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+}
+
+.close-btn{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  border:0;
+  background:#e50914;
+  color:white;
+  font-size:18px;
+  cursor:pointer;
 }
 
 /* TV CONTROLS */
@@ -197,7 +213,7 @@ iframe{
   display:none;
   align-items:center;
   justify-content:center;
-  z-index:99999;
+  z-index:999999;
 }
 
 .popup-box{
@@ -234,25 +250,25 @@ iframe{
 
 <!-- POPUP -->
 
-<div class="popup" id="startupPopup">
+<div class="popup" id="popup">
 
   <div class="popup-box">
 
     <h2>Featured Picks</h2>
 
-    <p>Movie: Coraline</p>
+    <p>🎬 Coraline</p>
 
     <button
       class="primary"
-      onclick="openFeatured('Coraline','movie')">
+      onclick="featured('Coraline','movie')">
       Watch Movie
     </button>
 
-    <p>Show: SK8 the Infinity</p>
+    <p>📺 SK8 the Infinity</p>
 
     <button
       class="primary"
-      onclick="openFeatured('SK8 the Infinity','tv')">
+      onclick="featured('SK8 the Infinity','tv')">
       Watch Show
     </button>
 
@@ -274,25 +290,14 @@ iframe{
 
 <!-- SETTINGS -->
 
-<div class="settings-panel" id="settingsPanel">
+<div class="settings" id="settings">
 
   <h3>Themes</h3>
 
-  <button onclick="setTheme('red')">
-    Red
-  </button>
-
-  <button onclick="setTheme('blue')">
-    Blue
-  </button>
-
-  <button onclick="setTheme('purple')">
-    Purple
-  </button>
-
-  <button onclick="setTheme('green')">
-    Green
-  </button>
+  <button onclick="theme('red')">Netflix Red</button>
+  <button onclick="theme('blue')">Ocean Blue</button>
+  <button onclick="theme('purple')">Purple</button>
+  <button onclick="theme('green')">Green</button>
 
 </div>
 
@@ -301,7 +306,7 @@ iframe{
 <header>
 
   <div class="logo">
-    ENDERA'S MOVIES
+    ENDERA
   </div>
 
   <input
@@ -309,7 +314,7 @@ iframe{
     placeholder="Search movies & shows..."
   />
 
-  <button onclick="search()">
+  <button onclick="searchMedia()">
     Search
   </button>
 
@@ -322,39 +327,25 @@ iframe{
 <!-- CONTINUE -->
 
 <div class="row">
-
   <h2>Continue Watching</h2>
-
   <div class="scroll" id="continueRow"></div>
-
 </div>
 
 <!-- TRENDING -->
 
 <div class="row">
-
   <h2>Trending Movies</h2>
-
   <div class="scroll" id="movies"></div>
-
 </div>
 
 <div class="row">
-
   <h2>Trending TV</h2>
-
   <div class="scroll" id="tv"></div>
-
 </div>
 
-<!-- SEARCH -->
-
 <div class="row">
-
   <h2>Search Results</h2>
-
   <div class="scroll" id="results"></div>
-
 </div>
 
 <!-- PLAYER -->
@@ -363,28 +354,13 @@ iframe{
 
   <div class="player-box">
 
-    <div style="
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:10px;
-    ">
+    <div class="topbar">
 
-      <h2 id="title"></h2>
+      <h2 id="playerTitle"></h2>
 
       <button
-        onclick="closePlayer()"
-        style="
-          background:#e50914;
-          border:0;
-          color:white;
-          width:42px;
-          height:42px;
-          border-radius:50%;
-          cursor:pointer;
-          font-size:18px;
-          font-weight:bold;
-        ">
+        class="close-btn"
+        onclick="closePlayer()">
         ✕
       </button>
 
@@ -397,15 +373,15 @@ iframe{
       <input
         id="season"
         type="number"
-        value="1"
         min="1"
+        value="1"
       />
 
       <input
         id="episode"
         type="number"
-        value="1"
         min="1"
+        value="1"
       />
 
       <button onclick="loadPlayer()">
@@ -417,7 +393,13 @@ iframe{
     <iframe
       id="player"
       allowfullscreen
-      allow="autoplay; fullscreen">
+      allow="autoplay; fullscreen"
+      sandbox="
+        allow-scripts
+        allow-same-origin
+        allow-forms
+        allow-presentation
+      ">
     </iframe>
 
   </div>
@@ -436,48 +418,54 @@ let currentType = "movie";
 
 function toggleSettings(){
 
-  const panel =
-    document.getElementById("settingsPanel");
+  const s =
+    document.getElementById("settings");
 
-  panel.style.display =
-    panel.style.display === "block"
+  s.style.display =
+    s.style.display === "block"
       ? "none"
       : "block";
 }
 
-function setTheme(theme){
+function theme(t){
 
-  if(theme === "red"){
-    document.documentElement.style.setProperty("--accent","#e50914");
-    document.documentElement.style.setProperty("--hero1","#0b1020");
-    document.documentElement.style.setProperty("--hero2","#1b0000");
+  if(t==="red"){
+    set("#0b1020","#1b0000","#e50914");
   }
 
-  if(theme === "blue"){
-    document.documentElement.style.setProperty("--accent","#3b82f6");
-    document.documentElement.style.setProperty("--hero1","#071428");
-    document.documentElement.style.setProperty("--hero2","#0f3b63");
+  if(t==="blue"){
+    set("#071428","#0f3b63","#3b82f6");
   }
 
-  if(theme === "purple"){
-    document.documentElement.style.setProperty("--accent","#a855f7");
-    document.documentElement.style.setProperty("--hero1","#14051f");
-    document.documentElement.style.setProperty("--hero2","#32104d");
+  if(t==="purple"){
+    set("#16051f","#35104d","#a855f7");
   }
 
-  if(theme === "green"){
-    document.documentElement.style.setProperty("--accent","#22c55e");
-    document.documentElement.style.setProperty("--hero1","#03140a");
-    document.documentElement.style.setProperty("--hero2","#0d3d21");
+  if(t==="green"){
+    set("#04140a","#0c3b1d","#22c55e");
   }
 
-  localStorage.setItem("theme",theme);
+  localStorage.setItem("theme",t);
+}
+
+function set(bg1,bg2,accent){
+
+  document.documentElement
+    .style.setProperty("--bg1",bg1);
+
+  document.documentElement
+    .style.setProperty("--bg2",bg2);
+
+  document.documentElement
+    .style.setProperty("--accent",accent);
 }
 
 /* POPUP */
 
 function closePopup(){
-  document.getElementById("startupPopup").style.display = "none";
+
+  document.getElementById("popup")
+    .style.display="none";
 }
 
 function dontShowAgain(){
@@ -490,7 +478,7 @@ function dontShowAgain(){
   closePopup();
 }
 
-async function openFeatured(name,type){
+async function featured(name,type){
 
   const res =
     await fetch(
@@ -505,14 +493,11 @@ async function openFeatured(name,type){
 
   if(!item) return;
 
-  const poster =
-    `https://image.tmdb.org/t/p/w300${item.poster_path}`;
-
   openPlayer(
     item.id,
     type,
-    name,
-    poster
+    item.title || item.name,
+    `https://image.tmdb.org/t/p/w300${item.poster_path}`
   );
 
   closePopup();
@@ -533,7 +518,7 @@ function saveContinue(
     );
 
   list =
-    list.filter(i => i.id !== id);
+    list.filter(i=>i.id!==id);
 
   list.unshift({
     id,
@@ -586,11 +571,7 @@ function renderContinue(){
 
 /* RENDER */
 
-function render(
-  id,
-  data,
-  type
-){
+function render(id,data,type){
 
   const box =
     document.getElementById(id);
@@ -654,11 +635,13 @@ async function loadTrending(){
 
 /* SEARCH */
 
-async function search(){
+async function searchMedia(){
 
   const q =
     document.getElementById("searchInput")
-    .value;
+    .value.trim();
+
+  if(!q) return;
 
   const res =
     await fetch(
@@ -668,11 +651,11 @@ async function search(){
   const data =
     await res.json();
 
-  const filtered =
+  const results =
     (data.results || [])
     .filter(i =>
-      i.media_type === "movie" ||
-      i.media_type === "tv"
+      i.media_type==="movie" ||
+      i.media_type==="tv"
     );
 
   const box =
@@ -680,7 +663,7 @@ async function search(){
 
   box.innerHTML = "";
 
-  filtered.forEach(i=>{
+  results.forEach(i=>{
 
     const title =
       i.title || i.name;
@@ -718,21 +701,19 @@ function openPlayer(
 ){
 
   currentId = id;
+
   currentType =
     type === "tv"
       ? "tv"
       : "movie";
 
-  document
-    .getElementById("title")
+  document.getElementById("playerTitle")
     .textContent = title;
 
-  document
-    .getElementById("playerModal")
+  document.getElementById("playerModal")
     .style.display = "flex";
 
-  document
-    .getElementById("tvControls")
+  document.getElementById("tvControls")
     .style.display =
       currentType === "tv"
         ? "flex"
@@ -752,13 +733,15 @@ function loadPlayer(){
 
   let url = "";
 
-  if(currentType === "tv"){
+  if(currentType==="tv"){
 
     const season =
-      document.getElementById("season").value || 1;
+      document.getElementById("season")
+      .value || 1;
 
     const episode =
-      document.getElementById("episode").value || 1;
+      document.getElementById("episode")
+      .value || 1;
 
     url =
       `https://vidfast.pro/tv/${currentId}/${season}/${episode}?autoPlay=true`;
@@ -792,6 +775,42 @@ function closePlayer(){
   iframe.src = "about:blank";
 }
 
+/* REDIRECT BLOCKER */
+
+const iframe =
+  document.getElementById("player");
+
+window.addEventListener(
+  "beforeunload",
+  (e)=>{
+
+    if(
+      document.activeElement === iframe
+    ){
+      e.preventDefault();
+      e.returnValue = "";
+    }
+  }
+);
+
+document.addEventListener(
+  "click",
+  (e)=>{
+
+    const link =
+      e.target.closest("a");
+
+    if(!link) return;
+
+    if(
+      document.getElementById("playerModal")
+        .style.display === "flex"
+    ){
+      e.preventDefault();
+    }
+  }
+);
+
 /* INIT */
 
 loadTrending();
@@ -802,16 +821,15 @@ const savedTheme =
   localStorage.getItem("theme");
 
 if(savedTheme){
-  setTheme(savedTheme);
+  theme(savedTheme);
 }
 
 if(
   localStorage.getItem("hidePopup")
   !== "true"
 ){
-  document
-    .getElementById("startupPopup")
-    .style.display = "flex";
+  document.getElementById("popup")
+    .style.display="flex";
 }
 
 </script>
