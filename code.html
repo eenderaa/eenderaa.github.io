@@ -1,0 +1,1069 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Endera's Movies</title>
+
+<style>
+
+:root{
+  --bg:#0b1020;
+  --panel:#121a33;
+  --card:#16203f;
+  --text:#ffffff;
+  --muted:#9aa8c7;
+  --accent:#e50914;
+  --hero1:#0b1020;
+  --hero2:#1b0000;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:
+    linear-gradient(
+      135deg,
+      var(--hero1),
+      var(--hero2)
+    );
+  color:var(--text);
+  min-height:100vh;
+}
+
+/* NAVBAR */
+
+header{
+  position:sticky;
+  top:0;
+  z-index:1000;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:16px 24px;
+  background:rgba(0,0,0,.65);
+  backdrop-filter:blur(14px);
+}
+
+.logo{
+  font-size:30px;
+  font-weight:900;
+  color:var(--accent);
+  letter-spacing:1px;
+}
+
+.search-wrap{
+  flex:1;
+  display:flex;
+  gap:10px;
+}
+
+.search-wrap input{
+  flex:1;
+  border:0;
+  outline:none;
+  border-radius:999px;
+  padding:14px 18px;
+  background:#1b1f2e;
+  color:white;
+  font-size:15px;
+}
+
+.search-wrap button{
+  border:0;
+  border-radius:999px;
+  padding:0 24px;
+  background:var(--accent);
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.profile-btn{
+  border:1px solid rgba(255,255,255,.1);
+  background:#1a1a1a;
+  color:white;
+  padding:10px 16px;
+  border-radius:999px;
+  cursor:pointer;
+}
+
+/* HERO */
+
+.hero{
+  min-height:65vh;
+  display:flex;
+  align-items:flex-end;
+  padding:60px 40px;
+}
+
+.hero-content{
+  max-width:700px;
+}
+
+.hero h1{
+  margin:0;
+  font-size:64px;
+  line-height:1;
+}
+
+.hero p{
+  color:#d2d2d2;
+  font-size:18px;
+  margin-top:18px;
+  line-height:1.6;
+}
+
+.hero-buttons{
+  display:flex;
+  gap:14px;
+  margin-top:24px;
+}
+
+.hero-buttons button{
+  border:0;
+  border-radius:10px;
+  padding:14px 22px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.play-btn{
+  background:white;
+  color:black;
+}
+
+.info-btn{
+  background:rgba(255,255,255,.18);
+  color:white;
+}
+
+/* RESULTS */
+
+.section{
+  padding:0 24px 30px;
+}
+
+.section h2{
+  margin-bottom:18px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:18px;
+}
+
+.card{
+  position:relative;
+  overflow:hidden;
+  border-radius:14px;
+  cursor:pointer;
+  transition:.25s;
+  background:#111827;
+}
+
+.card:hover{
+  transform:scale(1.05);
+  z-index:2;
+}
+
+.card img{
+  width:100%;
+  aspect-ratio:2/3;
+  object-fit:cover;
+  display:block;
+}
+
+.overlay{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(
+    to top,
+    rgba(0,0,0,.95),
+    transparent 60%
+  );
+  opacity:0;
+  transition:.25s;
+  display:flex;
+  align-items:flex-end;
+  padding:12px;
+}
+
+.card:hover .overlay{
+  opacity:1;
+}
+
+.overlay h3{
+  margin:0;
+  font-size:15px;
+}
+
+.overlay span{
+  color:#c8c8c8;
+  font-size:12px;
+}
+
+/* PLAYER */
+
+.player-modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.92);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+
+.player-box{
+  width:min(1200px,95vw);
+}
+
+.player-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+}
+
+.close-btn{
+  background:var(--accent);
+  color:white;
+  border:0;
+  padding:10px 16px;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+iframe{
+  width:100%;
+  height:70vh;
+  border:0;
+  border-radius:16px;
+  background:black;
+}
+
+.tv-controls{
+  display:none;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.tv-controls input{
+  width:120px;
+  padding:12px;
+  border-radius:10px;
+  border:0;
+  background:#1f2937;
+  color:white;
+}
+
+.tv-controls button{
+  border:0;
+  border-radius:10px;
+  background:var(--accent);
+  color:white;
+  padding:12px 18px;
+  cursor:pointer;
+}
+
+/* PANELS */
+
+.panel{
+  position:fixed;
+  top:80px;
+  right:20px;
+  width:320px;
+  background:#101522;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:18px;
+  padding:18px;
+  display:none;
+  z-index:2000;
+}
+
+.panel h3{
+  margin-top:0;
+}
+
+.panel input{
+  width:100%;
+  margin-top:10px;
+  padding:12px;
+  border-radius:10px;
+  border:0;
+  background:#1b2235;
+  color:white;
+}
+
+.panel button{
+  width:100%;
+  margin-top:12px;
+  border:0;
+  border-radius:10px;
+  padding:12px;
+  cursor:pointer;
+  background:var(--accent);
+  color:white;
+  font-weight:bold;
+}
+
+.user-badge{
+  font-size:13px;
+  color:#9aa8c7;
+}
+
+.theme-btn{
+  margin-top:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+  <div class="logo">
+    ENDERA
+  </div>
+
+  <div class="search-wrap">
+
+    <input
+      id="searchInput"
+      placeholder="Search movies or TV shows..."
+    />
+
+    <button id="searchBtn">
+      Search
+    </button>
+
+  </div>
+
+  <button class="profile-btn" id="profileToggle">
+    Account
+  </button>
+
+  <button class="profile-btn" id="settingsToggle">
+    ⚙️
+  </button>
+
+</header>
+
+<div class="hero">
+
+  <div class="hero-content">
+
+    <h1>
+      Unlimited Movies & TV
+    </h1>
+
+    <p>
+      Stream movies and TV shows instantly.
+    </p>
+
+    <div class="hero-buttons">
+
+      <button
+        class="play-btn"
+        onclick="scrollToResults()">
+        Browse
+      </button>
+
+      <button class="info-btn">
+        Endera's Movies
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<div class="section">
+
+  <h2>Trending</h2>
+
+  <div class="grid" id="results"></div>
+
+</div>
+
+<!-- LOGIN PANEL -->
+
+<div class="panel" id="loginPanel">
+
+  <h3>Optional Account</h3>
+
+  <div class="user-badge" id="authStatus">
+    Not signed in
+  </div>
+
+  <input
+    id="email"
+    placeholder="Email"
+  />
+
+  <input
+    id="password"
+    type="password"
+    placeholder="Password"
+  />
+
+  <button id="signupBtn">
+    Sign Up
+  </button>
+
+  <button id="loginBtn">
+    Login
+  </button>
+
+  <button id="logoutBtn">
+    Logout
+  </button>
+
+</div>
+
+<!-- SETTINGS PANEL -->
+
+<div class="panel" id="settingsPanel">
+
+  <h3>Appearance</h3>
+
+  <div class="user-badge">
+    Choose a theme
+  </div>
+
+  <button
+    class="theme-btn"
+    onclick="setTheme('netflix')">
+    Netflix Red
+  </button>
+
+  <button
+    class="theme-btn"
+    onclick="setTheme('blue')">
+    Ocean Blue
+  </button>
+
+  <button
+    class="theme-btn"
+    onclick="setTheme('purple')">
+    Purple Night
+  </button>
+
+  <button
+    class="theme-btn"
+    onclick="setTheme('green')">
+    Matrix Green
+  </button>
+
+</div>
+
+<!-- PLAYER -->
+
+<div class="player-modal" id="playerModal">
+
+  <div class="player-box">
+
+    <div class="player-top">
+
+      <h2 id="playerTitle">
+        Player
+      </h2>
+
+      <button
+        class="close-btn"
+        onclick="closePlayer()">
+        Close
+      </button>
+
+    </div>
+
+    <div
+      class="tv-controls"
+      id="tvControls">
+
+      <input
+        id="season"
+        type="number"
+        value="1"
+        min="1"
+        placeholder="Season"
+      />
+
+      <input
+        id="episode"
+        type="number"
+        value="1"
+        min="1"
+        placeholder="Episode"
+      />
+
+      <button onclick="loadPlayer()">
+        Load Episode
+      </button>
+
+    </div>
+
+    <iframe
+      id="player"
+      allowfullscreen
+      allow="autoplay; fullscreen">
+    </iframe>
+
+  </div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+/* FIREBASE */
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAJ3-oWYmy-gdFwsmAQF1OyHMO72lIP2bI",
+  authDomain: "enderasmovies.firebaseapp.com",
+  projectId: "enderasmovies",
+  storageBucket: "enderasmovies.firebasestorage.app",
+  messagingSenderId: "572565758997",
+  appId: "1:572565758997:web:d4f84c35166b50b0d8da1c"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+/* TMDB */
+
+const TMDB_KEY =
+  "c926a0628b472f4bde70b9457ed62bc3";
+
+/* GLOBALS */
+
+let currentId = "";
+let currentType = "movie";
+
+/* PANELS */
+
+const loginPanel =
+  document.getElementById("loginPanel");
+
+const settingsPanel =
+  document.getElementById("settingsPanel");
+
+document
+  .getElementById("profileToggle")
+  .addEventListener("click",()=>{
+
+    loginPanel.style.display =
+      loginPanel.style.display === "block"
+        ? "none"
+        : "block";
+  });
+
+document
+  .getElementById("settingsToggle")
+  .addEventListener("click",()=>{
+
+    settingsPanel.style.display =
+      settingsPanel.style.display === "block"
+        ? "none"
+        : "block";
+  });
+
+/* THEMES */
+
+window.setTheme = (theme)=>{
+
+  const root =
+    document.documentElement;
+
+  if(theme === "netflix"){
+
+    root.style.setProperty(
+      "--accent",
+      "#e50914"
+    );
+
+    root.style.setProperty(
+      "--hero1",
+      "#0b1020"
+    );
+
+    root.style.setProperty(
+      "--hero2",
+      "#1b0000"
+    );
+  }
+
+  if(theme === "blue"){
+
+    root.style.setProperty(
+      "--accent",
+      "#3b82f6"
+    );
+
+    root.style.setProperty(
+      "--hero1",
+      "#071428"
+    );
+
+    root.style.setProperty(
+      "--hero2",
+      "#0f3b63"
+    );
+  }
+
+  if(theme === "purple"){
+
+    root.style.setProperty(
+      "--accent",
+      "#a855f7"
+    );
+
+    root.style.setProperty(
+      "--hero1",
+      "#14051f"
+    );
+
+    root.style.setProperty(
+      "--hero2",
+      "#32104d"
+    );
+  }
+
+  if(theme === "green"){
+
+    root.style.setProperty(
+      "--accent",
+      "#22c55e"
+    );
+
+    root.style.setProperty(
+      "--hero1",
+      "#03140a"
+    );
+
+    root.style.setProperty(
+      "--hero2",
+      "#0d3d21"
+    );
+  }
+
+  localStorage.setItem(
+    "endera_theme",
+    theme
+  );
+};
+
+window.addEventListener("load",()=>{
+
+  const saved =
+    localStorage.getItem(
+      "endera_theme"
+    );
+
+  if(saved){
+    setTheme(saved);
+  }
+});
+
+/* AUTH */
+
+async function signup(){
+
+  try{
+
+    const email =
+      document
+        .getElementById("email")
+        .value;
+
+    const password =
+      document
+        .getElementById("password")
+        .value;
+
+    await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+
+    alert("Account created");
+
+  }catch(err){
+
+    alert(err.message);
+  }
+}
+
+async function login(){
+
+  try{
+
+    const email =
+      document
+        .getElementById("email")
+        .value;
+
+    const password =
+      document
+        .getElementById("password")
+        .value;
+
+    await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+
+  }catch(err){
+
+    alert(err.message);
+  }
+}
+
+function logout(){
+  signOut(auth);
+}
+
+onAuthStateChanged(auth,user=>{
+
+  const status =
+    document.getElementById(
+      "authStatus"
+    );
+
+  if(user){
+
+    status.textContent =
+      "Signed in as " +
+      user.email;
+
+  }else{
+
+    status.textContent =
+      "Not signed in";
+  }
+});
+
+/* AUTH BUTTONS */
+
+document
+  .getElementById("signupBtn")
+  .addEventListener(
+    "click",
+    signup
+  );
+
+document
+  .getElementById("loginBtn")
+  .addEventListener(
+    "click",
+    login
+  );
+
+document
+  .getElementById("logoutBtn")
+  .addEventListener(
+    "click",
+    logout
+  );
+
+/* SEARCH */
+
+async function search(){
+
+  const q =
+    document
+      .getElementById("searchInput")
+      .value
+      .trim();
+
+  if(!q) return;
+
+  const results =
+    document.getElementById(
+      "results"
+    );
+
+  results.innerHTML = "";
+
+  try{
+
+    const res = await fetch(
+      `https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${encodeURIComponent(q)}`
+    );
+
+    const data =
+      await res.json();
+
+    (data.results || [])
+      .filter(item =>
+        item.media_type === "movie" ||
+        item.media_type === "tv"
+      )
+      .forEach(item=>{
+
+        const title =
+          item.title ||
+          item.name ||
+          "Unknown";
+
+        const year =
+          (
+            item.release_date ||
+            item.first_air_date ||
+            ""
+          ).split("-")[0];
+
+        const poster =
+          item.poster_path
+            ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
+            : "https://placehold.co/300x450/111827/ffffff?text=No+Image";
+
+        const tmdbId =
+          item.id;
+
+        const type =
+          item.media_type === "tv"
+            ? "series"
+            : "movie";
+
+        results.innerHTML += `
+          <div
+            class="card"
+            title="${title}"
+            onclick="openTMDB('${tmdbId}','${type}','${title.replace(/'/g,"\\'")}')">
+
+            <img src="${poster}">
+
+            <div class="overlay">
+
+              <div>
+
+                <h3>${title}</h3>
+
+                <span>${year}</span>
+
+              </div>
+
+            </div>
+
+          </div>
+        `;
+      });
+
+  }catch(err){
+
+    console.error(err);
+
+    results.innerHTML =
+      "<p>Failed to load results.</p>";
+  }
+}
+
+/* TMDB -> IMDB */
+
+async function openTMDB(
+  id,
+  type,
+  title
+){
+
+  try{
+
+    const endpoint =
+      type === "series"
+        ? "tv"
+        : "movie";
+
+    const res = await fetch(
+      `https://api.themoviedb.org/3/${endpoint}/${id}/external_ids?api_key=${TMDB_KEY}`
+    );
+
+    const data =
+      await res.json();
+
+    if(!data.imdb_id){
+
+      alert(
+        "IMDb ID not found."
+      );
+
+      return;
+    }
+
+    openPlayer(
+      data.imdb_id,
+      type,
+      title
+    );
+
+  }catch(err){
+
+    console.error(err);
+
+    alert(
+      "Failed to load player."
+    );
+  }
+}
+
+/* PLAYER */
+
+window.openPlayer = (
+  imdbId,
+  type,
+  title
+)=>{
+
+  currentId = imdbId;
+  currentType = type;
+
+  document
+    .getElementById(
+      "playerTitle"
+    )
+    .textContent = title;
+
+  document
+    .getElementById(
+      "playerModal"
+    )
+    .style.display = "flex";
+
+  document
+    .getElementById(
+      "tvControls"
+    )
+    .style.display =
+      type === "series"
+        ? "flex"
+        : "none";
+
+  loadPlayer();
+};
+
+window.closePlayer = ()=>{
+
+  document
+    .getElementById(
+      "playerModal"
+    )
+    .style.display = "none";
+
+  document
+    .getElementById(
+      "player"
+    )
+    .src = "";
+};
+
+window.loadPlayer = ()=>{
+
+  let url = "";
+
+  if(currentType === "series"){
+
+    const season =
+      document
+        .getElementById(
+          "season"
+        )
+        .value;
+
+    const episode =
+      document
+        .getElementById(
+          "episode"
+        )
+        .value;
+
+    url =
+      `https://vidfast.pro/tv/${currentId}/${season}/${episode}?autoPlay=true`;
+
+  }else{
+
+    url =
+      `https://vidfast.pro/movie/${currentId}?autoPlay=true`;
+  }
+
+  document
+    .getElementById(
+      "player"
+    )
+    .src = url;
+};
+
+/* BUTTONS */
+
+document
+  .getElementById(
+    "searchBtn"
+  )
+  .addEventListener(
+    "click",
+    search
+  );
+
+document
+  .getElementById(
+    "searchInput"
+  )
+  .addEventListener(
+    "keydown",
+    e=>{
+
+      if(e.key === "Enter"){
+        search();
+      }
+    }
+  );
+
+window.scrollToResults = ()=>{
+
+  document
+    .querySelector(".section")
+    .scrollIntoView({
+      behavior:"smooth"
+    });
+};
+
+/* DEFAULT LOAD */
+
+window.addEventListener(
+  "load",
+  ()=>{
+
+    document
+      .getElementById(
+        "searchInput"
+      )
+      .value = "Marvel";
+
+    search();
+  }
+);
+
+</script>
+
+</body>
+</html>
+
