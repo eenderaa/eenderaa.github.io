@@ -23,8 +23,6 @@ body{
   overflow-x:hidden;
 }
 
-/* HEADER */
-
 header{
   position:sticky;
   top:0;
@@ -63,8 +61,6 @@ header button{
   font-weight:bold;
 }
 
-/* SETTINGS */
-
 .settings{
   position:fixed;
   top:70px;
@@ -82,8 +78,6 @@ header button{
   margin-top:8px;
 }
 
-/* ROWS */
-
 .row{
   padding:18px 20px;
 }
@@ -98,8 +92,6 @@ header button{
 }
 
 .scroll::-webkit-scrollbar{display:none;}
-
-/* CARDS */
 
 .card{
   min-width:150px;
@@ -133,8 +125,6 @@ header button{
 
 .card:hover .overlay{opacity:1;}
 
-/* PLAYER */
-
 .modal{
   position:fixed;
   inset:0;
@@ -157,8 +147,6 @@ iframe{
   background:black;
 }
 
-/* TV CONTROLS */
-
 .tv-controls{
   display:none;
   gap:10px;
@@ -171,8 +159,6 @@ iframe{
   border-radius:10px;
   border:0;
 }
-
-/* POPUP */
 
 .popup{
   position:fixed;
@@ -208,7 +194,6 @@ iframe{
 
 <body>
 
-<!-- POPUP -->
 <div class="popup" id="popup">
   <div class="popup-box">
     <h2>Featured Picks</h2>
@@ -224,13 +209,11 @@ iframe{
   </div>
 </div>
 
-<!-- SETTINGS -->
 <div class="settings" id="settings">
   <button onclick="theme('red')">Red</button>
   <button onclick="theme('blue')">Blue</button>
 </div>
 
-<!-- HEADER -->
 <header>
   <div class="logo">ENDERA</div>
 
@@ -239,13 +222,11 @@ iframe{
   <button onclick="toggleSettings()">⚙️</button>
 </header>
 
-<!-- CONTINUE -->
 <div class="row">
   <h2>Continue Watching</h2>
   <div class="scroll" id="continueRow"></div>
 </div>
 
-<!-- TRENDING -->
 <div class="row">
   <h2>Trending Movies</h2>
   <div class="scroll" id="movies"></div>
@@ -256,7 +237,6 @@ iframe{
   <div class="scroll" id="tv"></div>
 </div>
 
-<!-- GENRES -->
 <div class="row">
   <h2>Action</h2>
   <div class="scroll" id="actionRow"></div>
@@ -272,15 +252,12 @@ iframe{
   <div class="scroll" id="horrorRow"></div>
 </div>
 
-<!-- RECOMMENDATIONS -->
 <div class="row">
   <h2>Recommended For You</h2>
   <div class="scroll" id="recommendRow"></div>
 </div>
 
-<!-- PLAYER -->
 <div class="modal" id="playerModal">
-
   <div class="player-box">
 
     <h2 id="playerTitle"></h2>
@@ -291,7 +268,6 @@ iframe{
       <button onclick="loadPlayer()">Load</button>
     </div>
 
-    <!-- FIXED IFRAME -->
     <iframe id="player"
       allow="autoplay; fullscreen; encrypted-media"
       referrerpolicy="no-referrer">
@@ -307,13 +283,11 @@ const TMDB_KEY = "c926a0628b472f4bde70b9457ed62bc3";
 let currentId="";
 let currentType="movie";
 
-/* SETTINGS */
 function toggleSettings(){
   const s=document.getElementById("settings");
   s.style.display = s.style.display==="block"?"none":"block";
 }
 
-/* POPUP */
 function closePopup(){
   document.getElementById("popup").style.display="none";
 }
@@ -322,7 +296,6 @@ function dontShowAgain(){
   closePopup();
 }
 
-/* FEATURED */
 async function featured(name,type){
   const res=await fetch(
     `https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${encodeURIComponent(name)}`
@@ -335,7 +308,6 @@ async function featured(name,type){
   closePopup();
 }
 
-/* CONTINUE */
 function saveContinue(id,type,title,poster){
   let list=JSON.parse(localStorage.getItem("cw")||"[]");
   list=list.filter(i=>i.id!==id);
@@ -357,7 +329,6 @@ function renderContinue(){
   });
 }
 
-/* RENDER */
 function render(id,data,type){
   const box=document.getElementById(id);
   box.innerHTML="";
@@ -372,7 +343,6 @@ function render(id,data,type){
   });
 }
 
-/* TRENDING */
 async function loadTrending(){
   const m=await fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${TMDB_KEY}`).then(r=>r.json());
   const t=await fetch(`https://api.themoviedb.org/3/trending/tv/week?api_key=${TMDB_KEY}`).then(r=>r.json());
@@ -381,9 +351,7 @@ async function loadTrending(){
   render("tv",t.results||[],"tv");
 }
 
-/* GENRES */
 async function loadGenres(){
-
   const load=async(id,row)=>{
     const r=await fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${TMDB_KEY}&with_genres=${id}`).then(r=>r.json());
     render(row,r.results||[],"movie");
@@ -394,13 +362,11 @@ async function loadGenres(){
   load(27,"horrorRow");
 }
 
-/* RECOMMENDATIONS */
 async function loadRecommendations(id,type){
   const r=await fetch(`https://api.themoviedb.org/3/${type}/${id}/recommendations?api_key=${TMDB_KEY}`).then(r=>r.json());
   render("recommendRow",r.results||[],type);
 }
 
-/* SEARCH */
 async function searchMedia(){
   const q=document.getElementById("searchInput").value.trim();
   if(!q)return;
@@ -411,7 +377,6 @@ async function searchMedia(){
   render("tv",r.results.filter(i=>i.media_type==="tv"),"tv");
 }
 
-/* PLAYER */
 function openPlayer(id,type,title,poster){
   currentId=id;
   currentType=type==="tv"?"tv":"movie";
@@ -434,9 +399,9 @@ function loadPlayer(){
   if(currentType==="tv"){
     const s=season.value||1;
     const e=episode.value||1;
-    url=`https://vidfast.pro/tv/${currentId}/${s}/${e}?autoPlay=true`;
+    url=`https://vidking.app/tv/${currentId}/${s}/${e}`;
   } else {
-    url=`https://vidfast.pro/movie/${currentId}?autoPlay=true`;
+    url=`https://vidking.app/movie/${currentId}`;
   }
 
   player.src="about:blank";
@@ -448,7 +413,6 @@ function closePlayer(){
   player.src="about:blank";
 }
 
-/* INIT */
 loadTrending();
 loadGenres();
 renderContinue();
@@ -461,4 +425,3 @@ if(localStorage.getItem("hidePopup")!=="true"){
 
 </body>
 </html>
-
