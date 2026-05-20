@@ -399,9 +399,9 @@ function loadPlayer(){
   if(currentType==="tv"){
     const s=season.value||1;
     const e=episode.value||1;
-    url=`https://vidking.app/tv/${currentId}/${s}/${e}`;
+    url=`https://www.vidking.net/embed/tv/${currentId}/${s}/${e}`;
   } else {
-    url=`https://vidking.app/movie/${currentId}`;
+    url=`https://www.vidking.net/embed/movie/${currentId}`;
   }
 
   player.src="about:blank";
