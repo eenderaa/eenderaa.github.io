@@ -1,427 +1,932 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Endera's Movies</title>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campfire — Chat</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
-:root{
-  --bg1:#0b1020;
-  --bg2:#1b0000;
-  --accent:#e50914;
-}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-*{box-sizing:border-box;}
+  :root {
+    --bg:        #0f0f11;
+    --surface:   #17171a;
+    --panel:     #1e1e22;
+    --border:    #2a2a30;
+    --ember:     #f97316;
+    --ember-dim: #7a3810;
+    --text:      #e8e6e1;
+    --muted:     #6b6876;
+    --online:    #34d399;
+    --radius:    12px;
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --sidebar:   260px;
+  }
 
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:linear-gradient(135deg,var(--bg1),var(--bg2));
-  color:white;
-  overflow-x:hidden;
-}
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    overflow: hidden;
+  }
 
-header{
-  position:sticky;
-  top:0;
-  z-index:999;
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:14px 20px;
-  background:rgba(0,0,0,.75);
-  backdrop-filter:blur(10px);
-}
+  /* ── LANDING OVERLAY ── */
+  #landing {
+    position: fixed; inset: 0; z-index: 100;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+  }
 
-.logo{
-  font-size:28px;
-  font-weight:900;
-  color:var(--accent);
-}
+  .landing-card {
+    width: 360px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px 36px;
+    display: flex; flex-direction: column; gap: 28px;
+  }
 
-header input{
-  flex:1;
-  padding:12px;
-  border-radius:999px;
-  border:0;
-  background:#1a1f2e;
-  color:white;
-  outline:none;
-}
+  .landing-brand {
+    display: flex; align-items: center; gap: 12px;
+  }
 
-header button{
-  border:0;
-  padding:12px 16px;
-  border-radius:999px;
-  background:var(--accent);
-  color:white;
-  cursor:pointer;
-  font-weight:bold;
-}
+  .brand-icon {
+    width: 40px; height: 40px;
+    background: var(--ember);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
 
-.settings{
-  position:fixed;
-  top:70px;
-  right:20px;
-  width:220px;
-  background:#111827;
-  border-radius:16px;
-  padding:14px;
-  display:none;
-  z-index:9999;
-}
+  .brand-name {
+    font-size: 22px; font-weight: 600; letter-spacing: -0.5px;
+  }
 
-.settings button{
-  width:100%;
-  margin-top:8px;
-}
+  .brand-name span { color: var(--ember); }
 
-.row{
-  padding:18px 20px;
-}
+  .landing-card h2 {
+    font-size: 16px; font-weight: 500; color: var(--muted);
+    line-height: 1.4;
+  }
 
-.row h2{margin-bottom:10px;}
+  .field-group { display: flex; flex-direction: column; gap: 12px; }
 
-.scroll{
-  display:flex;
-  gap:12px;
-  overflow-x:auto;
-  padding-bottom:10px;
-}
+  .field { display: flex; flex-direction: column; gap: 6px; }
 
-.scroll::-webkit-scrollbar{display:none;}
+  .field label {
+    font-size: 12px; font-weight: 500; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--muted);
+  }
 
-.card{
-  min-width:150px;
-  width:150px;
-  border-radius:12px;
-  overflow:hidden;
-  position:relative;
-  cursor:pointer;
-  transition:.2s;
-  background:#111;
-}
+  .field input, .field select {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
 
-.card:hover{transform:scale(1.08);}
+  .field input:focus, .field select:focus {
+    border-color: var(--ember);
+  }
 
-.card img{
-  width:100%;
-  height:225px;
-  object-fit:cover;
-}
+  .field select option { background: var(--panel); }
 
-.overlay{
-  position:absolute;
-  inset:0;
-  display:flex;
-  align-items:flex-end;
-  padding:10px;
-  background:linear-gradient(to top,rgba(0,0,0,.95),transparent);
-  opacity:0;
-  transition:.2s;
-}
+  .btn-join {
+    background: var(--ember);
+    color: #fff;
+    border: none;
+    border-radius: 9px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+    padding: 12px;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
 
-.card:hover .overlay{opacity:1;}
+  .btn-join:hover { opacity: 0.9; }
+  .btn-join:active { transform: scale(0.98); }
 
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.94);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:99999;
-}
+  /* ── MAIN APP ── */
+  #app {
+    display: none;
+    height: 100vh;
+    flex-direction: row;
+  }
 
-.player-box{
-  width:min(1200px,95vw);
-}
+  #app.visible { display: flex; }
 
-iframe{
-  width:100%;
-  height:75vh;
-  border:0;
-  border-radius:14px;
-  background:black;
-}
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar);
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
 
-.tv-controls{
-  display:none;
-  gap:10px;
-  margin-bottom:10px;
-}
+  .sidebar-header {
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
 
-.tv-controls input{
-  width:100px;
-  padding:10px;
-  border-radius:10px;
-  border:0;
-}
+  .sidebar-brand-icon {
+    width: 28px; height: 28px;
+    background: var(--ember);
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
 
-.popup{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.88);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:999999;
-}
+  .sidebar-brand { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; }
+  .sidebar-brand span { color: var(--ember); }
 
-.popup-box{
-  width:320px;
-  background:#111827;
-  border-radius:18px;
-  padding:20px;
-  text-align:center;
-}
+  .sidebar-section {
+    padding: 16px 20px 8px;
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--muted);
+  }
 
-.popup-box button{
-  width:100%;
-  margin-top:10px;
-  padding:10px;
-  border:0;
-  border-radius:10px;
-}
+  .channel-list { padding: 0 10px; flex: 1; overflow-y: auto; }
 
-.primary{background:var(--accent);color:white;}
-.secondary{background:#333;color:white;}
+  .channel-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 13.5px;
+    transition: background 0.12s, color 0.12s;
+  }
 
+  .channel-item:hover { background: var(--panel); color: var(--text); }
+
+  .channel-item.active {
+    background: color-mix(in srgb, var(--ember) 12%, transparent);
+    color: var(--text);
+  }
+
+  .channel-item.active .ch-hash { color: var(--ember); }
+
+  .ch-hash { font-size: 15px; font-weight: 500; color: var(--border); }
+
+  .channel-item.active .ch-hash { color: var(--ember); }
+
+  .user-list { padding: 0 10px 10px; overflow-y: auto; max-height: 220px; }
+
+  .user-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 13px; color: var(--muted);
+  }
+
+  .user-avatar {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    font-size: 11px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    color: #fff;
+  }
+
+  .user-status {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--online);
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  .sidebar-me {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .me-avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .me-info { flex: 1; min-width: 0; }
+  .me-name { font-size: 13px; font-weight: 500; truncate: true; }
+  .me-tag  { font-size: 11px; color: var(--muted); }
+
+  .me-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--online);
+    flex-shrink: 0;
+  }
+
+  /* ── MAIN CHAT AREA ── */
+  .chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: var(--bg);
+  }
+
+  .chat-header {
+    padding: 0 24px;
+    height: 56px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .chat-header-hash { font-size: 18px; color: var(--ember); font-weight: 500; }
+
+  .chat-header-name { font-size: 15px; font-weight: 600; }
+
+  .chat-header-divider {
+    width: 1px; height: 18px;
+    background: var(--border); margin: 0 4px;
+  }
+
+  .chat-header-desc { font-size: 13px; color: var(--muted); }
+
+  .online-count {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--muted);
+  }
+
+  .online-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--online);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ── MESSAGES ── */
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 24px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    scroll-behavior: smooth;
+  }
+
+  .messages::-webkit-scrollbar { width: 4px; }
+  .messages::-webkit-scrollbar-track { background: transparent; }
+  .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .day-divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 16px 0 10px;
+    color: var(--muted); font-size: 12px; font-weight: 500;
+  }
+
+  .day-divider::before, .day-divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  .msg-group {
+    display: flex; gap: 12px;
+    padding: 4px 6px;
+    border-radius: 8px;
+    transition: background 0.1s;
+    margin-top: 8px;
+  }
+
+  .msg-group:hover { background: rgba(255,255,255,0.02); }
+
+  .msg-group.continued { margin-top: 1px; }
+
+  .msg-group.continued .msg-header { display: none; }
+
+  .msg-group.continued .msg-avatar { visibility: hidden; }
+
+  .msg-group.mine .bubble {
+    background: color-mix(in srgb, var(--ember) 14%, var(--panel));
+    border: 1px solid color-mix(in srgb, var(--ember) 20%, transparent);
+  }
+
+  .msg-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    font-size: 14px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .msg-body { flex: 1; min-width: 0; }
+
+  .msg-header {
+    display: flex; align-items: baseline; gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .msg-name {
+    font-size: 13.5px; font-weight: 600; color: var(--text);
+  }
+
+  .msg-time {
+    font-size: 11px; color: var(--muted);
+    font-family: var(--font-mono);
+  }
+
+  .bubble {
+    display: inline-block;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px 12px 12px 12px;
+    padding: 8px 14px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--text);
+    max-width: 100%;
+    word-break: break-word;
+  }
+
+  .msg-group.mine .bubble {
+    border-radius: 12px 4px 12px 12px;
+  }
+
+  /* System messages */
+  .msg-system {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    padding: 6px 0;
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .msg-system::before, .msg-system::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  .msg-system .sys-badge {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 11px;
+  }
+
+  /* Typing indicator */
+  .typing-row {
+    padding: 4px 6px 8px;
+    min-height: 26px;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--muted);
+  }
+
+  .typing-dots {
+    display: flex; gap: 3px; align-items: center;
+  }
+
+  .typing-dots span {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--muted);
+    animation: dot-bounce 1.2s ease-in-out infinite;
+  }
+
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes dot-bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-4px); opacity: 1; }
+  }
+
+  /* ── INPUT ── */
+  .input-area {
+    padding: 12px 24px 20px;
+    flex-shrink: 0;
+  }
+
+  .input-wrapper {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    display: flex; align-items: flex-end; gap: 0;
+    transition: border-color 0.15s;
+    overflow: hidden;
+  }
+
+  .input-wrapper:focus-within { border-color: var(--ember); }
+
+  #msg-input {
+    flex: 1;
+    background: transparent;
+    border: none; outline: none;
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 13px 14px;
+    resize: none;
+    max-height: 160px;
+    overflow-y: auto;
+  }
+
+  #msg-input::placeholder { color: var(--muted); }
+
+  .input-actions {
+    display: flex; align-items: center;
+    padding: 8px 12px;
+    gap: 4px;
+  }
+
+  .btn-send {
+    width: 34px; height: 34px;
+    background: var(--ember);
+    border: none; border-radius: 8px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+
+  .btn-send:hover { opacity: 0.85; }
+  .btn-send:active { transform: scale(0.94); }
+
+  .btn-send svg { width: 16px; height: 16px; }
+
+  .emoji-btn {
+    background: none; border: none;
+    cursor: pointer; color: var(--muted);
+    font-size: 18px; padding: 4px;
+    border-radius: 6px;
+    transition: color 0.12s, background 0.12s;
+    line-height: 1;
+  }
+
+  .emoji-btn:hover { color: var(--text); background: var(--border); }
+
+  /* Emoji picker */
+  .emoji-picker {
+    position: absolute;
+    bottom: 80px;
+    right: 30px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    display: none;
+    flex-wrap: wrap;
+    gap: 6px;
+    width: 256px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    z-index: 10;
+  }
+
+  .emoji-picker.open { display: flex; }
+
+  .emoji-btn-item {
+    background: none; border: none;
+    font-size: 20px; cursor: pointer;
+    border-radius: 6px; padding: 4px;
+    transition: background 0.1s;
+    line-height: 1;
+  }
+
+  .emoji-btn-item:hover { background: var(--border); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .sidebar { display: none; }
+    :root { --sidebar: 0px; }
+  }
 </style>
 </head>
-
 <body>
 
-<div class="popup" id="popup">
-  <div class="popup-box">
-    <h2>Featured Picks</h2>
-
-    <p>Coraline</p>
-    <button class="primary" onclick="featured('Coraline','movie')">Watch</button>
-
-    <p>SK8 the Infinity</p>
-    <button class="primary" onclick="featured('SK8 the Infinity','tv')">Watch</button>
-
-    <button class="secondary" onclick="dontShowAgain()">Don't show again</button>
-    <button class="secondary" onclick="closePopup()">Close</button>
+<!-- LANDING -->
+<div id="landing">
+  <div class="landing-card">
+    <div class="landing-brand">
+      <div class="brand-icon">🔥</div>
+      <div class="brand-name">Camp<span>fire</span></div>
+    </div>
+    <h2>A place to chat with anyone in the same browser. Open this page in multiple tabs to see it in action.</h2>
+    <div class="field-group">
+      <div class="field">
+        <label>Your name</label>
+        <input type="text" id="username-input" placeholder="e.g. Alex Rivera" maxlength="24" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Colour</label>
+        <select id="color-select">
+          <option value="#f97316">🟠 Ember</option>
+          <option value="#3b82f6">🔵 Cobalt</option>
+          <option value="#8b5cf6">🟣 Violet</option>
+          <option value="#34d399">🟢 Mint</option>
+          <option value="#f43f5e">🔴 Rose</option>
+          <option value="#facc15">🟡 Gold</option>
+          <option value="#06b6d4">🩵 Sky</option>
+          <option value="#ec4899">🩷 Pink</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn-join" id="join-btn">Join the chat →</button>
   </div>
 </div>
 
-<div class="settings" id="settings">
-  <button onclick="theme('red')">Red</button>
-  <button onclick="theme('blue')">Blue</button>
-</div>
-
-<header>
-  <div class="logo">ENDERA</div>
-
-  <input id="searchInput" placeholder="Search..." />
-  <button onclick="searchMedia()">Search</button>
-  <button onclick="toggleSettings()">⚙️</button>
-</header>
-
-<div class="row">
-  <h2>Continue Watching</h2>
-  <div class="scroll" id="continueRow"></div>
-</div>
-
-<div class="row">
-  <h2>Trending Movies</h2>
-  <div class="scroll" id="movies"></div>
-</div>
-
-<div class="row">
-  <h2>Trending Shows</h2>
-  <div class="scroll" id="tv"></div>
-</div>
-
-<div class="row">
-  <h2>Action</h2>
-  <div class="scroll" id="actionRow"></div>
-</div>
-
-<div class="row">
-  <h2>Comedy</h2>
-  <div class="scroll" id="comedyRow"></div>
-</div>
-
-<div class="row">
-  <h2>Horror</h2>
-  <div class="scroll" id="horrorRow"></div>
-</div>
-
-<div class="row">
-  <h2>Recommended For You</h2>
-  <div class="scroll" id="recommendRow"></div>
-</div>
-
-<div class="modal" id="playerModal">
-  <div class="player-box">
-
-    <h2 id="playerTitle"></h2>
-
-    <div class="tv-controls" id="tvControls">
-      <input id="season" type="number" value="1"/>
-      <input id="episode" type="number" value="1"/>
-      <button onclick="loadPlayer()">Load</button>
+<!-- APP -->
+<div id="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand-icon">🔥</div>
+      <div class="sidebar-brand">Camp<span>fire</span></div>
     </div>
 
-    <iframe id="player"
-      allow="autoplay; fullscreen; encrypted-media"
-      referrerpolicy="no-referrer">
-    </iframe>
+    <div class="sidebar-section">Channels</div>
+    <div class="channel-list" id="channel-list">
+      <div class="channel-item active" data-channel="general">
+        <span class="ch-hash">#</span> general
+      </div>
+      <div class="channel-item" data-channel="random">
+        <span class="ch-hash">#</span> random
+      </div>
+      <div class="channel-item" data-channel="ideas">
+        <span class="ch-hash">#</span> ideas
+      </div>
+      <div class="channel-item" data-channel="dev">
+        <span class="ch-hash">#</span> dev
+      </div>
+    </div>
 
-  </div>
+    <div class="sidebar-section">Online</div>
+    <div class="user-list" id="user-list"></div>
+
+    <div class="sidebar-me">
+      <div class="me-avatar" id="me-avatar"></div>
+      <div class="me-info">
+        <div class="me-name" id="me-name-display"></div>
+        <div class="me-tag">You</div>
+      </div>
+      <div class="me-dot"></div>
+    </div>
+  </aside>
+
+  <!-- Chat -->
+  <main class="chat-area">
+    <div class="chat-header">
+      <span class="chat-header-hash">#</span>
+      <span class="chat-header-name" id="channel-name">general</span>
+      <div class="chat-header-divider"></div>
+      <span class="chat-header-desc" id="channel-desc">The main hangout</span>
+      <div class="online-count">
+        <div class="online-dot"></div>
+        <span id="online-count">1 online</span>
+      </div>
+    </div>
+
+    <div class="messages" id="messages">
+      <div class="day-divider">Today</div>
+      <div class="msg-system">
+        <span class="sys-badge">🔥 Welcome to #general — say hello!</span>
+      </div>
+    </div>
+
+    <div class="typing-row" id="typing-row"></div>
+
+    <div class="input-area" style="position:relative">
+      <div class="emoji-picker" id="emoji-picker"></div>
+      <div class="input-wrapper">
+        <textarea id="msg-input" rows="1" placeholder="Message #general…"></textarea>
+        <div class="input-actions">
+          <button class="emoji-btn" id="emoji-toggle" title="Emoji">😊</button>
+          <button class="btn-send" id="send-btn" title="Send">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
 </div>
 
 <script>
+// ── State ──
+const EMOJIS = ['😀','😂','😍','🤔','😎','🥳','😢','😡','👍','👎','❤️','🔥','🎉','✨','💡','🤝','💯','🙌','👀','🚀','💬','😅','🤣','😭','🥰','😤','🤯','🎯','💪','🌟'];
+const CHANNEL_DESCS = { general:'The main hangout', random:'Anything goes', ideas:'Share your thoughts', dev:'Tech talk' };
 
-const TMDB_KEY = "c926a0628b472f4bde70b9457ed62bc3";
+let me = { name: '', color: '#f97316', id: '' };
+let currentChannel = 'general';
+let channelMessages = { general:[], random:[], ideas:[], dev:[] };
+let onlineUsers = {};         // id -> {name,color,typing,channel}
+let typingTimer = null;
+let lastMsgAuthor = {};       // channel -> last author id
+let lastMsgTime = {};         // channel -> last msg timestamp
 
-let currentId="";
-let currentType="movie";
+const bc = new BroadcastChannel('campfire_v1');
 
-function toggleSettings(){
-  const s=document.getElementById("settings");
-  s.style.display = s.style.display==="block"?"none":"block";
+// ── DOM ──
+const landing      = document.getElementById('landing');
+const app          = document.getElementById('app');
+const joinBtn      = document.getElementById('join-btn');
+const usernameInput= document.getElementById('username-input');
+const colorSelect  = document.getElementById('color-select');
+const messagesEl   = document.getElementById('messages');
+const msgInput     = document.getElementById('msg-input');
+const sendBtn      = document.getElementById('send-btn');
+const userList     = document.getElementById('user-list');
+const onlineCount  = document.getElementById('online-count');
+const typingRow    = document.getElementById('typing-row');
+const emojiToggle  = document.getElementById('emoji-toggle');
+const emojiPicker  = document.getElementById('emoji-picker');
+const channelList  = document.getElementById('channel-list');
+const channelName  = document.getElementById('channel-name');
+const channelDesc  = document.getElementById('channel-desc');
+const meAvatar     = document.getElementById('me-avatar');
+const meNameDisp   = document.getElementById('me-name-display');
+const msgInputPh   = msgInput;
+
+// ── Helpers ──
+function uid() { return Math.random().toString(36).slice(2,10) + Date.now().toString(36); }
+function initials(name) { return name.trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2); }
+function timeStr() { return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
+function avatar(color, name, size) {
+  return `<div class="${size||'msg-avatar'}" style="background:${color}">${initials(name)}</div>`;
 }
 
-function closePopup(){
-  document.getElementById("popup").style.display="none";
-}
-function dontShowAgain(){
-  localStorage.setItem("hidePopup","true");
-  closePopup();
-}
+// Auto-resize textarea
+msgInput.addEventListener('input', () => {
+  msgInput.style.height = 'auto';
+  msgInput.style.height = Math.min(msgInput.scrollHeight, 160) + 'px';
+});
 
-async function featured(name,type){
-  const res=await fetch(
-    `https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${encodeURIComponent(name)}`
-  );
-  const data=await res.json();
-  const item=data.results?.[0];
-  if(!item)return;
+// ── Join ──
+joinBtn.addEventListener('click', join);
+usernameInput.addEventListener('keydown', e => { if(e.key==='Enter') join(); });
 
-  openPlayer(item.id,type,item.title||item.name,"");
-  closePopup();
-}
+function join() {
+  const name = usernameInput.value.trim();
+  if (!name) { usernameInput.focus(); usernameInput.style.borderColor='var(--ember)'; return; }
+  me.name  = name;
+  me.color = colorSelect.value;
+  me.id    = uid();
 
-function saveContinue(id,type,title,poster){
-  let list=JSON.parse(localStorage.getItem("cw")||"[]");
-  list=list.filter(i=>i.id!==id);
-  list.unshift({id,type,title,poster});
-  localStorage.setItem("cw",JSON.stringify(list.slice(0,10)));
-  renderContinue();
-}
+  meAvatar.style.background = me.color;
+  meAvatar.textContent = initials(me.name);
+  meNameDisp.textContent = me.name;
 
-function renderContinue(){
-  const box=document.getElementById("continueRow");
-  const list=JSON.parse(localStorage.getItem("cw")||"[]");
-  box.innerHTML="";
-  list.forEach(i=>{
-    box.innerHTML+=`
-      <div class="card" onclick="openPlayer('${i.id}','${i.type}','${i.title}','${i.poster}')">
-        <img src="${i.poster}">
-        <div class="overlay"><span>${i.title}</span></div>
-      </div>`;
+  landing.style.display = 'none';
+  app.classList.add('visible');
+  msgInput.focus();
+
+  onlineUsers[me.id] = { name:me.name, color:me.color, typing:false, channel:currentChannel };
+  broadcast({ type:'join', from:me.id, name:me.name, color:me.color, channel:currentChannel });
+  broadcast({ type:'presence_req', from:me.id });
+  renderUsers();
+
+  // Clear stale typing from previous tabs
+  window.addEventListener('beforeunload', () => {
+    broadcast({ type:'leave', from:me.id });
   });
 }
 
-function render(id,data,type){
-  const box=document.getElementById(id);
-  box.innerHTML="";
-  data.forEach(i=>{
-    const title=i.title||i.name;
-    const poster=`https://image.tmdb.org/t/p/w300${i.poster_path}`;
-    box.innerHTML+=`
-      <div class="card" onclick="openPlayer('${i.id}','${type}','${title}','${poster}')">
-        <img src="${poster}">
-        <div class="overlay"><span>${title}</span></div>
-      </div>`;
-  });
-}
+// ── BroadcastChannel ──
+bc.onmessage = e => {
+  const d = e.data;
+  if (d.from === me.id) return;
 
-async function loadTrending(){
-  const m=await fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${TMDB_KEY}`).then(r=>r.json());
-  const t=await fetch(`https://api.themoviedb.org/3/trending/tv/week?api_key=${TMDB_KEY}`).then(r=>r.json());
+  switch(d.type) {
+    case 'join':
+      onlineUsers[d.from] = { name:d.name, color:d.color, typing:false, channel:d.channel };
+      renderUsers();
+      if(d.channel === currentChannel) {
+        appendSystem(`${d.name} joined #${d.channel}`);
+      }
+      // Reply with presence
+      broadcast({ type:'presence_ack', from:me.id, name:me.name, color:me.color, channel:currentChannel });
+      break;
 
-  render("movies",m.results||[],"movie");
-  render("tv",t.results||[],"tv");
-}
+    case 'presence_req':
+      broadcast({ type:'presence_ack', from:me.id, name:me.name, color:me.color, channel:currentChannel });
+      break;
 
-async function loadGenres(){
-  const load=async(id,row)=>{
-    const r=await fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${TMDB_KEY}&with_genres=${id}`).then(r=>r.json());
-    render(row,r.results||[],"movie");
-  };
+    case 'presence_ack':
+      if (!onlineUsers[d.from]) {
+        onlineUsers[d.from] = { name:d.name, color:d.color, typing:false, channel:d.channel };
+        renderUsers();
+      }
+      break;
 
-  load(28,"actionRow");
-  load(35,"comedyRow");
-  load(27,"horrorRow");
-}
+    case 'leave':
+      if (onlineUsers[d.from]) {
+        appendSystem(`${onlineUsers[d.from].name} left`);
+        delete onlineUsers[d.from];
+        renderUsers();
+      }
+      break;
 
-async function loadRecommendations(id,type){
-  const r=await fetch(`https://api.themoviedb.org/3/${type}/${id}/recommendations?api_key=${TMDB_KEY}`).then(r=>r.json());
-  render("recommendRow",r.results||[],type);
-}
+    case 'message':
+      if (d.channel !== currentChannel) {
+        // show badge on channel tab
+        const tab = document.querySelector(`.channel-item[data-channel="${d.channel}"]`);
+        if(tab && !tab.classList.contains('active')) tab.style.outline='1px solid var(--ember-dim)';
+        // store for when they switch
+      }
+      channelMessages[d.channel] = channelMessages[d.channel] || [];
+      channelMessages[d.channel].push(d);
+      if (d.channel === currentChannel) appendMessage(d);
+      break;
 
-async function searchMedia(){
-  const q=document.getElementById("searchInput").value.trim();
-  if(!q)return;
-
-  const r=await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${encodeURIComponent(q)}`).then(r=>r.json());
-
-  render("movies",r.results.filter(i=>i.media_type==="movie"),"movie");
-  render("tv",r.results.filter(i=>i.media_type==="tv"),"tv");
-}
-
-function openPlayer(id,type,title,poster){
-  currentId=id;
-  currentType=type==="tv"?"tv":"movie";
-
-  document.getElementById("playerTitle").textContent=title;
-  document.getElementById("playerModal").style.display="flex";
-
-  document.getElementById("tvControls").style.display=
-    currentType==="tv"?"flex":"none";
-
-  loadPlayer();
-  loadRecommendations(id,currentType);
-
-  saveContinue(id,type,title,poster);
-}
-
-function loadPlayer(){
-  let url="";
-
-  if(currentType==="tv"){
-    const s=season.value||1;
-    const e=episode.value||1;
-    url=`https://www.vidking.net/embed/tv/${currentId}/${s}/${e}`;
-  } else {
-    url=`https://www.vidking.net/embed/movie/${currentId}`;
+    case 'typing':
+      if (onlineUsers[d.from]) {
+        onlineUsers[d.from].typing = d.isTyping;
+        renderTyping();
+      }
+      break;
   }
+};
 
-  player.src="about:blank";
-  setTimeout(()=>player.src=url,100);
+function broadcast(obj) { bc.postMessage(obj); }
+
+// ── Send ──
+function sendMessage() {
+  const text = msgInput.value.trim();
+  if (!text) return;
+  const msg = {
+    type:'message', from:me.id, name:me.name,
+    color:me.color, text, channel:currentChannel,
+    ts: timeStr(), id: uid()
+  };
+  channelMessages[currentChannel].push(msg);
+  appendMessage(msg);
+  broadcast(msg);
+  msgInput.value = '';
+  msgInput.style.height = 'auto';
+  stopTyping();
 }
 
-function closePlayer(){
-  playerModal.style.display="none";
-  player.src="about:blank";
+sendBtn.addEventListener('click', sendMessage);
+msgInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+
+// ── Typing ──
+msgInput.addEventListener('input', () => {
+  if (!me.id) return;
+  broadcast({ type:'typing', from:me.id, isTyping:true, channel:currentChannel });
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(stopTyping, 2200);
+});
+
+function stopTyping() {
+  clearTimeout(typingTimer);
+  broadcast({ type:'typing', from:me.id, isTyping:false, channel:currentChannel });
 }
 
-loadTrending();
-loadGenres();
-renderContinue();
-
-if(localStorage.getItem("hidePopup")!=="true"){
-  popup.style.display="flex";
+function renderTyping() {
+  const typers = Object.values(onlineUsers)
+    .filter(u => u.typing && u.name !== me.name && u.channel === currentChannel);
+  if (!typers.length) { typingRow.innerHTML = ''; return; }
+  const names = typers.map(u=>`<strong style="color:${u.color}">${u.name}</strong>`).join(', ');
+  const verb = typers.length === 1 ? 'is' : 'are';
+  typingRow.innerHTML = `
+    <div class="typing-dots"><span></span><span></span><span></span></div>
+    <span>${names} ${verb} typing…</span>`;
 }
 
+// ── Render messages ──
+function appendMessage(msg) {
+  const isMine = msg.from === me.id;
+  const prevAuthor = lastMsgAuthor[currentChannel];
+  const prevTime   = lastMsgTime[currentChannel];
+  const now = Date.now();
+  const continued = prevAuthor === msg.from && (now - (prevTime||0)) < 90000;
+
+  lastMsgAuthor[currentChannel] = msg.from;
+  lastMsgTime[currentChannel]   = now;
+
+  const group = document.createElement('div');
+  group.className = `msg-group${isMine?' mine':''}${continued?' continued':''}`;
+  group.innerHTML = `
+    <div class="msg-avatar" style="background:${msg.color}">${initials(msg.name)}</div>
+    <div class="msg-body">
+      <div class="msg-header">
+        <span class="msg-name" style="color:${msg.color}">${escHtml(msg.name)}</span>
+        <span class="msg-time">${msg.ts}</span>
+      </div>
+      <div class="bubble">${escHtml(msg.text)}</div>
+    </div>`;
+  messagesEl.appendChild(group);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function appendSystem(text) {
+  const el = document.createElement('div');
+  el.className = 'msg-system';
+  el.innerHTML = `<span class="sys-badge">${escHtml(text)}</span>`;
+  messagesEl.appendChild(el);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  // Reset continued state
+  lastMsgAuthor[currentChannel] = null;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Users panel ──
+function renderUsers() {
+  const all = [{ ...me, id: me.id }, ...Object.entries(onlineUsers)
+    .filter(([id]) => id !== me.id)
+    .map(([id,u]) => ({...u, id}))];
+
+  onlineCount.textContent = `${all.length} online`;
+
+  userList.innerHTML = all.map(u => `
+    <div class="user-item">
+      <div class="user-avatar" style="background:${u.color}">${initials(u.name)}</div>
+      <span>${escHtml(u.name)}${u.id===me.id?' (you)':''}</span>
+      <div class="user-status"></div>
+    </div>`).join('');
+}
+
+// ── Channels ──
+channelList.addEventListener('click', e => {
+  const item = e.target.closest('.channel-item');
+  if (!item) return;
+  const ch = item.dataset.channel;
+  if (ch === currentChannel) return;
+
+  document.querySelectorAll('.channel-item').forEach(el => { el.classList.remove('active'); el.style.outline=''; });
+  item.classList.add('active');
+  currentChannel = ch;
+
+  channelName.textContent = ch;
+  channelDesc.textContent = CHANNEL_DESCS[ch] || '';
+  msgInput.placeholder = `Message #${ch}…`;
+
+  messagesEl.innerHTML = `<div class="day-divider">Today</div>
+    <div class="msg-system"><span class="sys-badge">📌 #${ch} — ${CHANNEL_DESCS[ch]||''}</span></div>`;
+  lastMsgAuthor[ch] = null;
+  lastMsgTime[ch]   = null;
+
+  // Re-render stored messages for channel
+  (channelMessages[ch]||[]).forEach(appendMessage);
+
+  broadcast({ type:'presence_ack', from:me.id, name:me.name, color:me.color, channel:currentChannel });
+  if (onlineUsers[me.id]) onlineUsers[me.id].channel = currentChannel;
+  renderTyping();
+});
+
+// ── Emoji picker ──
+EMOJIS.forEach(em => {
+  const btn = document.createElement('button');
+  btn.className = 'emoji-btn-item';
+  btn.textContent = em;
+  btn.addEventListener('click', () => {
+    const pos = msgInput.selectionStart;
+    const val = msgInput.value;
+    msgInput.value = val.slice(0,pos) + em + val.slice(pos);
+    msgInput.focus();
+    msgInput.setSelectionRange(pos+em.length, pos+em.length);
+    emojiPicker.classList.remove('open');
+  });
+  emojiPicker.appendChild(btn);
+});
+
+emojiToggle.addEventListener('click', () => emojiPicker.classList.toggle('open'));
+document.addEventListener('click', e => {
+  if (!emojiPicker.contains(e.target) && e.target !== emojiToggle) {
+    emojiPicker.classList.remove('open');
+  }
+});
+
+// ── Focus username input ──
+usernameInput.focus();
 </script>
-
 </body>
 </html>
+
